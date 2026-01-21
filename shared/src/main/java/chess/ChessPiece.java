@@ -1,7 +1,10 @@
 package chess;
 
+import chess.calculator.PieceMovesCalculator;
+
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -52,10 +55,23 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ChessPiece piece = board.getPiece(myPosition);
-        if (piece.getPieceType() == PieceType.BISHOP) {
-            return List.of(new ChessMove(myPosition, new ChessPosition(1,8), null));
+        ArrayList<ChessMove> options = new ArrayList<ChessMove>();
+        PieceMovesCalculator calc = new PieceMovesCalculator(board, myPosition);
+        options.addAll(calc.pieceMoves());
+        return options;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        return List.of();
+        ChessPiece that = (ChessPiece) o;
+        return teamColor == that.teamColor && pieceType == that.pieceType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamColor, pieceType);
     }
 }
