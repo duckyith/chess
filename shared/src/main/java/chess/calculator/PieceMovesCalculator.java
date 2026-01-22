@@ -23,21 +23,21 @@ public class PieceMovesCalculator {
         if (piece.getPieceType() == ChessPiece.PieceType.BISHOP){
             return new BishopMovesCalculator(board, position).calc();
         }
-//        if (piece.getPieceType() == ChessPiece.PieceType.ROOK){
-//            return new RookMovesCalculator(board, position).calc;
-//        }
-//        if (piece.getPieceType() == ChessPiece.PieceType.QUEEN){
-//            return new QueenMovesCalculator(board, position).calc;
-//        }
-//        if (piece.getPieceType() == ChessPiece.PieceType.KING){
-//            return new KingMovesCalculator(board, position).calc;
-//        }
-//        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
-//            return new KnightMovesCalculator(board, position).calc;
-//        }
-//        if (piece.getPieceType() == ChessPiece.PieceType.PAWN){
-//            return new PawnMovesCalculator(board, position).calc;
-//        }
+        if (piece.getPieceType() == ChessPiece.PieceType.ROOK){
+            return new RookMovesCalculator(board, position).calc();
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.QUEEN){
+            return new QueenMovesCalculator(board, position).calc();
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.KING){
+            return new KingMovesCalculator(board, position).calc();
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.KNIGHT){
+            return new KnightMovesCalculator(board, position).calc();
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.PAWN){
+            return new PawnMovesCalculator(board, position).calc();
+        }
         return new ArrayList<ChessMove>();
     }
 }

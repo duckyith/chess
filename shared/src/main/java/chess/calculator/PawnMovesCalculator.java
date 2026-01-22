@@ -1,15 +1,17 @@
 package chess.calculator;
 
-import chess.*;
+import chess.ChessBoard;
+import chess.ChessMove;
+import chess.ChessPosition;
 
 import java.util.ArrayList;
 
-public class BishopMovesCalculator {
+public class PawnMovesCalculator {
 
     ChessBoard board;
     ChessPosition position;
 
-    public BishopMovesCalculator(ChessBoard board, ChessPosition position){
+    public PawnMovesCalculator(ChessBoard board, ChessPosition position){
         this.board = board;
         this.position = position;
     }
@@ -20,6 +22,10 @@ public class BishopMovesCalculator {
         options.addAll(new ValidCalc(board, position, -1, 1, true).calc(position));
         options.addAll(new ValidCalc(board, position, 1, -1, true).calc(position));
         options.addAll(new ValidCalc(board, position, -1, -1, true).calc(position));
+        options.addAll(new ValidCalc(board, position, 1, 0, true).calc(position));
+        options.addAll(new ValidCalc(board, position, 0, 1, true).calc(position));
+        options.addAll(new ValidCalc(board, position, -1, 0, true).calc(position));
+        options.addAll(new ValidCalc(board, position, 0, -1, true).calc(position));
         return options;
     }
 

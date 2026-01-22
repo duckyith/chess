@@ -1,4 +1,4 @@
-package chess.calculator.diagonal;
+package chess.calculator;
 
 import chess.*;
 
