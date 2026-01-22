@@ -55,10 +55,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        ArrayList<ChessMove> options = new ArrayList<ChessMove>();
-        PieceMovesCalculator calc = new PieceMovesCalculator(board, myPosition);
-        options.addAll(calc.pieceMoves());
-        return options;
+        return new PieceMovesCalculator(board, myPosition).pieceMoves();
     }
 
     @Override
