@@ -1,8 +1,7 @@
 package chess;
 
-import chess.calculator.PieceMovesCalculator;
+import chess.calculators.ChessPieceMoves;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -14,11 +13,12 @@ import java.util.Objects;
  */
 public class ChessPiece {
 
-    ChessGame.TeamColor teamColor;
-    ChessPiece.PieceType pieceType;
+    ChessGame.TeamColor pieceColor;
+    ChessPiece.PieceType type;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-        teamColor = pieceColor;
-        pieceType = type;
+        this.pieceColor = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -37,14 +37,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        return teamColor;
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        return pieceType;
+        return type;
     }
 
     /**
@@ -55,7 +55,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new PieceMovesCalculator(board, myPosition).pieceMoves();
+        return new ChessPieceMoves(board, myPosition).calc();
     }
 
     @Override
@@ -64,11 +64,11 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return teamColor == that.teamColor && pieceType == that.pieceType;
+        return pieceColor == that.pieceColor && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(teamColor, pieceType);
+        return Objects.hash(pieceColor, type);
     }
 }
