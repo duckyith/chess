@@ -62,7 +62,7 @@ public class ChessGame {
         }
         ChessGame testGame = new ChessGame();
         for (ChessMove move : initialMoveSet) {
-            testGame.setBoard(game);
+            testGame.setBoard(new ChessBoard((game)));
             if (move.getPromotionPiece() != null){
                 testGame.game.addPiece(move.getEndPosition(), new ChessPiece (teamTurn, move.getPromotionPiece()));
                 testGame.game.addPiece(move.getStartPosition(), null);
@@ -102,14 +102,17 @@ public class ChessGame {
     }
 
     public ChessPosition findKing(TeamColor teamColor) {
-        int row = 1;
-        int col = 1;
-        for (int i = 0; i < 8; i++){
-            for (int j = 0; i < 8; i++){
-                if (game.squares[i][j].getPieceType() == ChessPiece.PieceType.KING && game.squares[i][j].getTeamColor() == teamColor){
-                    row += i;
-                    col += j;
-                    break;
+        int row = 0;
+        int col = 0;
+        for (int i = 1; i < 9; i++){
+            for (int j = 1; i < 9; i++){
+                ChessPosition position = new ChessPosition(i,j);
+                if (game.getPiece(position) != null) {
+                    if (game.getPiece(position).getPieceType() == ChessPiece.PieceType.KING && game.getPiece(position).getTeamColor() == teamColor) {
+                        row = i;
+                        col = j;
+                        break;
+                    }
                 }
             }
         }
@@ -128,11 +131,13 @@ public class ChessGame {
         for (int i = 1; i < 9; i++){
             for (int j = 1; i < 9; i++){
                 checkingPosition = new ChessPosition(i,j);
-                Collection<ChessMove> options = game.getPiece(checkingPosition).pieceMoves(game, checkingPosition);
-                for (ChessMove option : options){
-                    ChessPosition target = option.getEndPosition();
-                    if (target == kingLocation){
-                        return true;
+                if (game.getPiece(checkingPosition) != null) {
+                    Collection<ChessMove> options = game.getPiece(checkingPosition).pieceMoves(game, checkingPosition);
+                    for (ChessMove option : options) {
+                        ChessPosition target = option.getEndPosition();
+                        if (target == kingLocation) {
+                            return true;
+                        }
                     }
                 }
             }
