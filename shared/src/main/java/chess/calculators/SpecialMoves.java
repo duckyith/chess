@@ -1,9 +1,6 @@
 package chess.calculators;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.ArrayList;
 
@@ -22,13 +19,65 @@ public class SpecialMoves {
         if (board.getPiece(position) != null) {
             ChessPiece piece = board.getPiece(position);
             if (piece.getPieceType() == ChessPiece.PieceType.KING && !piece.getHasMoved()) {
-                if (rightCastle() == true) {
-                    options.add
+                if (rightCastle()) {
+                    ChessPosition target = new ChessPosition(position.getRow(), position.getColumn()+2);
+                    options.add(new ChessMove(position, target, null));
+                }
+                if (leftCastle()) {
+                    ChessPosition target = new ChessPosition(position.getRow(), position.getColumn()-2);
+                    options.add(new ChessMove(position, target, null));
                 }
             }
         }
         return options;
     }
 
-    public
+    public boolean rightCastle() {
+        ChessPosition rookPos = new ChessPosition(position.getRow(), 8);
+        ChessPiece rook = board.getPiece(rookPos);
+        ChessPiece king = board.getPiece(position);
+        ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()+1));
+        ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()+2));
+        if (null1 == null && null2 == null && rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
+            ChessGame testGame = new ChessGame();
+            testGame.setBoard(new ChessBoard(board));
+            if (!testGame.isInCheck(king.getTeamColor())) {
+                testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), king);
+                testGame.getBoard().addPiece(position, null);
+                if (!testGame.isInCheck(king.getTeamColor())) {
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 2), king);
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), null);
+                    return !testGame.isInCheck(king.getTeamColor());
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean leftCastle() {
+        ChessPosition rookPos = new ChessPosition(position.getRow(), 1);
+        ChessPiece rook = board.getPiece(rookPos);
+        ChessPiece king = board.getPiece(position);
+        ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()-1));
+        ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()-2));
+        if (null1 == null && null2 == null && rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
+            ChessGame testGame = new ChessGame();
+            testGame.setBoard(new ChessBoard(board));
+            if (!testGame.isInCheck(king.getTeamColor())) {
+                testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), king);
+                testGame.getBoard().addPiece(position, null);
+                if (!testGame.isInCheck(king.getTeamColor())) {
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 2), king);
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), null);
+                    return !testGame.isInCheck(king.getTeamColor());
+                }
+            }
+        }
+        return false;
+    }
+
+    public ArrayList<ChessMove> checkEnPassant() {
+        ArrayList<ChessMove> options = new ArrayList<>();
+        return options;
+    }
 }

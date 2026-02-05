@@ -63,19 +63,19 @@ public class ChessGame {
         for (ChessMove move : initialMoveSet) {
             testGame.setBoard(new ChessBoard(game));
             if (move.getPromotionPiece() != null){
-                testGame.game.addPiece(move.getEndPosition(), new ChessPiece (teamTurn, move.getPromotionPiece()));
-                testGame.game.addPiece(move.getStartPosition(), null);
+                testGame.getBoard().addPiece(move.getEndPosition(), new ChessPiece (teamTurn, move.getPromotionPiece()));
+                testGame.getBoard().addPiece(move.getStartPosition(), null);
             } else {
-                testGame.game.addPiece(move.getEndPosition(), piece);
-                testGame.game.addPiece(move.getStartPosition(), null);
+                testGame.getBoard().addPiece(move.getEndPosition(), piece);
+                testGame.getBoard().addPiece(move.getStartPosition(), null);
             }
             if (testGame.isInCheck(piece.getTeamColor())){
                 continue;
             }
             afterCheck.add(move);
         }
-        initialMoveSet.addAll(new SpecialMoves(game, startPosition).checkCastle());
-        initialMoveSet.addAll(new SpecialMoves(game, startPosition).checkEnPassant());
+        afterCheck.addAll(new SpecialMoves(game, startPosition).checkCastle());
+        afterCheck.addAll(new SpecialMoves(game, startPosition).checkEnPassant());
         return afterCheck;
     }
 
@@ -125,9 +125,11 @@ public class ChessGame {
                 if (moving >0) {
                     rook = game.getPiece(new ChessPosition(row,8));
                     game.addPiece(new ChessPosition(row, endPos.getColumn()-1),rook);
+                    game.addPiece(new ChessPosition(row,8), null);
                 } else {
                     rook = game.getPiece(new ChessPosition(row,1));
                     game.addPiece(new ChessPosition(row, endPos.getColumn()+1),rook);
+                    game.addPiece(new ChessPosition(row,1), null);
                 }
             }
         }
