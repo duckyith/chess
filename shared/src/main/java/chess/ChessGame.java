@@ -17,6 +17,7 @@ public class ChessGame {
 
     TeamColor teamTurn;
     ChessBoard game;
+    ChessMove prevMove;
 
     public ChessGame() {
         game = new ChessBoard();
@@ -57,6 +58,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ArrayList<ChessMove> initialMoveSet = new ArrayList<>(game.getPiece(startPosition).pieceMoves(game, startPosition));
+        initialMoveSet.addAll(new SpecialMoves(game, startPosition).checkEnPassant(prevMove));
         ArrayList<ChessMove> afterCheck = new ArrayList<>();
         ChessPiece piece = game.getPiece(startPosition);
         ChessGame testGame = new ChessGame();
@@ -75,7 +77,6 @@ public class ChessGame {
             afterCheck.add(move);
         }
         afterCheck.addAll(new SpecialMoves(game, startPosition).checkCastle());
-        afterCheck.addAll(new SpecialMoves(game, startPosition).checkEnPassant());
         return afterCheck;
     }
 
@@ -101,9 +102,10 @@ public class ChessGame {
                 game.addPiece(endPos, new ChessPiece (teamTurn, move.getPromotionPiece()));
                 game.addPiece(startPos, null);
             } else {
+                specialMoveEnPassant(movingPiece,startPos,endPos);
                 game.addPiece(endPos, movingPiece);
                 game.addPiece(startPos, null);
-                specialMove(movingPiece,startPos,endPos);
+                specialMoveCastle(movingPiece,startPos,endPos);
             }
         } else {
             throw new InvalidMoveException("Illegal move");
@@ -113,9 +115,10 @@ public class ChessGame {
         } else {
             setTeamTurn(TeamColor.WHITE);
         }
+        prevMove = move;
     }
 
-    public void specialMove(ChessPiece movingPiece, ChessPosition startPos, ChessPosition endPos) {
+    public void specialMoveCastle(ChessPiece movingPiece, ChessPosition startPos, ChessPosition endPos) {
         //if it's a king, is it moving more than 1, which way? move the rook too
         if (movingPiece.getPieceType() == ChessPiece.PieceType.KING){
             int moving = endPos.getColumn() - startPos.getColumn();
@@ -133,8 +136,12 @@ public class ChessGame {
                 }
             }
         }
-        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+    }
 
+    public void specialMoveEnPassant(ChessPiece movingPiece, ChessPosition startPos, ChessPosition endPos) {
+        //if you are changing columns as a pawn (capturing) but there is no piece there (must be EnPassant)
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN && endPos.getColumn() != startPos.getColumn() && game.getPiece(endPos) == null) {
+            game.addPiece(prevMove.getEndPosition(),null);
         }
     }
 

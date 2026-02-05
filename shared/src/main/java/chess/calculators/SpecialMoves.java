@@ -76,8 +76,27 @@ public class SpecialMoves {
         return false;
     }
 
-    public ArrayList<ChessMove> checkEnPassant() {
+    public ArrayList<ChessMove> checkEnPassant(ChessMove prevMove) {
         ArrayList<ChessMove> options = new ArrayList<>();
+        if (board.getPiece(position) != null && board.getPiece(position).getPieceType() == ChessPiece.PieceType.PAWN) {
+            if (prevMove != null) {
+                ChessPosition targetPos = prevMove.getEndPosition();
+                ChessPiece targetPiece = board.getPiece(targetPos);
+                ChessPiece.PieceType targetType = targetPiece.getPieceType();
+                int colDist = Math.abs(targetPos.getColumn() - position.getColumn());
+                int moveDist = Math.abs(prevMove.getStartPosition().getRow() - prevMove.getEndPosition().getRow());
+                //1 column away, it's a pawn, it moved more than 1 last turn
+                if (colDist == 1 && targetType == ChessPiece.PieceType.PAWN && moveDist > 1) {
+                    ChessPiece pawn = board.getPiece(position);
+                    ChessGame.TeamColor color = pawn.getTeamColor();
+                    if (color == ChessGame.TeamColor.WHITE && position.getRow() == 5) {
+                        options.add(new ChessMove(position, new ChessPosition (targetPos.getRow()+1,targetPos.getColumn()), null));
+                    } else if (color == ChessGame.TeamColor.BLACK && position.getRow() == 4) {
+                        options.add(new ChessMove(position, new ChessPosition (targetPos.getRow()-1,targetPos.getColumn()), null));
+                    }
+                }
+            }
+        }
         return options;
     }
 }
