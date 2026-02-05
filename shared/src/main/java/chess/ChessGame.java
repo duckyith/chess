@@ -1,5 +1,7 @@
 package chess;
 
+import chess.calculators.SpecialMoves;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -72,6 +74,8 @@ public class ChessGame {
             }
             afterCheck.add(move);
         }
+        initialMoveSet.addAll(new SpecialMoves(game, startPosition).checkCastle());
+        initialMoveSet.addAll(new SpecialMoves(game, startPosition).checkEnPassant());
         return afterCheck;
     }
 
@@ -92,12 +96,14 @@ public class ChessGame {
             throw new InvalidMoveException("Wrong turn");
         }
         if (validMoves(startPos).contains(move)){
+            movingPiece.setHasMoved(true);
             if (move.getPromotionPiece() != null){
                 game.addPiece(endPos, new ChessPiece (teamTurn, move.getPromotionPiece()));
                 game.addPiece(startPos, null);
             } else {
                 game.addPiece(endPos, movingPiece);
                 game.addPiece(startPos, null);
+                specialMove(movingPiece,startPos,endPos);
             }
         } else {
             throw new InvalidMoveException("Illegal move");
@@ -106,6 +112,27 @@ public class ChessGame {
             setTeamTurn(TeamColor.BLACK);
         } else {
             setTeamTurn(TeamColor.WHITE);
+        }
+    }
+
+    public void specialMove(ChessPiece movingPiece, ChessPosition startPos, ChessPosition endPos) {
+        //if it's a king, is it moving more than 1, which way? move the rook too
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.KING){
+            int moving = endPos.getColumn() - startPos.getColumn();
+            if (Math.abs(moving) >1) {
+                int row = startPos.getRow();
+                ChessPiece rook;
+                if (moving >0) {
+                    rook = game.getPiece(new ChessPosition(row,8));
+                    game.addPiece(new ChessPosition(row, endPos.getColumn()-1),rook);
+                } else {
+                    rook = game.getPiece(new ChessPosition(row,1));
+                    game.addPiece(new ChessPosition(row, endPos.getColumn()+1),rook);
+                }
+            }
+        }
+        if (movingPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+
         }
     }
 
