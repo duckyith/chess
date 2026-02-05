@@ -84,6 +84,9 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPos = move.getStartPosition();
         ChessPosition endPos = move.getEndPosition();
+        if (game.getPiece(startPos) == null) {
+            throw new InvalidMoveException("No piece");
+        }
         ChessPiece movingPiece = game.getPiece(startPos);
         if (movingPiece.getTeamColor() != teamTurn) {
             throw new InvalidMoveException("Wrong turn");
@@ -99,6 +102,27 @@ public class ChessGame {
         } else {
             throw new InvalidMoveException("Illegal move");
         }
+        if (teamTurn == TeamColor.WHITE){
+            setTeamTurn(TeamColor.BLACK);
+        } else {
+            setTeamTurn(TeamColor.WHITE);
+        }
+    }
+
+    public boolean anyValidMoves(TeamColor teamColor) {
+        for (int i = 1; i < 9; i++){
+            for (int j = 1; j < 9; j++){
+                ChessPosition position = new ChessPosition(i,j);
+                if (game.getPiece(position) != null) {
+                    if (game.getPiece(position).getTeamColor() == teamColor) {
+                        if (!validMoves(position).isEmpty()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public ChessPosition findKing(TeamColor teamColor) {
@@ -152,7 +176,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && validMoves(findKing(teamColor)).isEmpty();
+        return isInCheck(teamColor) && !anyValidMoves(teamColor);
     }
 
     /**
@@ -163,7 +187,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return !isInCheck(teamColor) && !anyValidMoves(teamColor);
     }
 
     /**
