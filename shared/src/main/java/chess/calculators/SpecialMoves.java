@@ -36,18 +36,20 @@ public class SpecialMoves {
         ChessPosition rookPos = new ChessPosition(position.getRow(), 8);
         ChessPiece rook = board.getPiece(rookPos);
         ChessPiece king = board.getPiece(position);
-        ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()+1));
-        ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()+2));
-        if (null1 == null && null2 == null && rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
-            ChessGame testGame = new ChessGame();
-            testGame.setBoard(new ChessBoard(board));
-            if (!testGame.isInCheck(king.getTeamColor())) {
-                testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), king);
-                testGame.getBoard().addPiece(position, null);
+        if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
+            ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn() + 1));
+            ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn() + 2));
+            if (null1 == null && null2 == null) {
+                ChessGame testGame = new ChessGame();
+                testGame.setBoard(new ChessBoard(board));
                 if (!testGame.isInCheck(king.getTeamColor())) {
-                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 2), king);
-                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), null);
-                    return !testGame.isInCheck(king.getTeamColor());
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), king);
+                    testGame.getBoard().addPiece(position, null);
+                    if (!testGame.isInCheck(king.getTeamColor())) {
+                        testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 2), king);
+                        testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() + 1), null);
+                        return !testGame.isInCheck(king.getTeamColor());
+                    }
                 }
             }
         }
@@ -58,18 +60,20 @@ public class SpecialMoves {
         ChessPosition rookPos = new ChessPosition(position.getRow(), 1);
         ChessPiece rook = board.getPiece(rookPos);
         ChessPiece king = board.getPiece(position);
-        ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()-1));
-        ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn()-2));
-        if (null1 == null && null2 == null && rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
-            ChessGame testGame = new ChessGame();
-            testGame.setBoard(new ChessBoard(board));
-            if (!testGame.isInCheck(king.getTeamColor())) {
-                testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), king);
-                testGame.getBoard().addPiece(position, null);
+        if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && rook.getTeamColor() == board.getPiece(position).getTeamColor() && !rook.getHasMoved()) {
+            ChessPiece null1 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn() - 1));
+            ChessPiece null2 = board.getPiece(new ChessPosition(position.getRow(), position.getColumn() - 2));
+            if (null1 == null && null2 == null) {
+                ChessGame testGame = new ChessGame();
+                testGame.setBoard(new ChessBoard(board));
                 if (!testGame.isInCheck(king.getTeamColor())) {
-                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 2), king);
-                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), null);
-                    return !testGame.isInCheck(king.getTeamColor());
+                    testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), king);
+                    testGame.getBoard().addPiece(position, null);
+                    if (!testGame.isInCheck(king.getTeamColor())) {
+                        testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 2), king);
+                        testGame.getBoard().addPiece(new ChessPosition(position.getRow(), position.getColumn() - 1), null);
+                        return !testGame.isInCheck(king.getTeamColor());
+                    }
                 }
             }
         }
