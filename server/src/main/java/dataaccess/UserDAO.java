@@ -1,4 +1,7 @@
 package dataaccess;
 
-public class UserDAO {
+import models.User;
+
+public interface UserDAO {
+    void create(User user) throws DataAccessException;
 }

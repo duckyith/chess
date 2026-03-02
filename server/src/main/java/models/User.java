@@ -1,4 +1,4 @@
 package models;
 
-public record User() {
+public record User(String username, String password, String email) {
 }
