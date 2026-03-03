@@ -28,6 +28,7 @@ public class Server {
         javalin.delete("/session", this::logout);
         javalin.delete("/db", this::clear);
         javalin.post("/game", this::create);
+        javalin.get("/game", this::list);
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
@@ -67,10 +68,15 @@ public class Server {
         context.status(200);
     }
 
-    public void create(Context context) throws UnauthorizedException, DataAccessException {
+    public void create(Context context) throws UnauthorizedException, DataAccessException, BadRequestException {
         GameData game = gson.fromJson(context.body(), GameData.class);
         GameData gameID = service.create(context.header("Authorization"),game);
         context.result(gson.toJson(gameID));
+        context.status(200);
+    }
+
+    public void list(Context context) throws UnauthorizedException, DataAccessException, BadRequestException {
+
         context.status(200);
     }
 

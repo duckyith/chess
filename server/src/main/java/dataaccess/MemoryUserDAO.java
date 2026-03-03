@@ -45,7 +45,7 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void create(GameData game) throws DataAccessException {
-        Games.put(game.gameName(), game);
+        Games.put(Integer.toString(game.gameID()), game);
     }
 
     @Override

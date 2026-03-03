@@ -52,8 +52,11 @@ public class Service {
         userDAO.removeToken(authToken);
     }
 
-    public GameData create(String authToken, GameData game) throws DataAccessException, UnauthorizedException {
+    public GameData create(String authToken, GameData game) throws DataAccessException, UnauthorizedException, BadRequestException {
         authenticate(authToken);
+        if (game.gameName() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
         int gameID = (int)(Math.random() * 9000) + 1000;
         GameData newGame = new GameData(gameID,null,null,game.gameName(),new ChessGame());
         userDAO.create(newGame);
