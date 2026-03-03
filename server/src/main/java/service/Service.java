@@ -6,6 +6,7 @@ import models.AuthData;
 import models.GameData;
 import models.UserData;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 public class Service {
@@ -61,6 +62,11 @@ public class Service {
         GameData newGame = new GameData(gameID,null,null,game.gameName(),new ChessGame());
         userDAO.create(newGame);
         return new GameData(gameID,null,null,null,null);
+    }
+
+    public ArrayList<GameData> list(String authToken) throws UnauthorizedException, DataAccessException {
+        authenticate(authToken);
+        return userDAO.list();
     }
 
     public void clear () {

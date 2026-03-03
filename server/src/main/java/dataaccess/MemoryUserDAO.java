@@ -49,6 +49,15 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
+    public ArrayList<GameData> list() throws DataAccessException {
+        ArrayList<GameData> games = new ArrayList<>();
+        for (GameData game : Games.values()) {
+            games.add(new GameData(game.gameID(), game.blackUsername(), game.whiteUsername(), game.gameName(), null));
+        }
+        return games;
+    }
+
+    @Override
     public void clear() {
         Tokens.clear();
         Users.clear();

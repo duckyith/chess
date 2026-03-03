@@ -9,6 +9,8 @@ import models.GameData;
 import models.UserData;
 import service.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
@@ -29,6 +31,7 @@ public class Server {
         javalin.delete("/db", this::clear);
         javalin.post("/game", this::create);
         javalin.get("/game", this::list);
+
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
@@ -75,8 +78,11 @@ public class Server {
         context.status(200);
     }
 
-    public void list(Context context) throws UnauthorizedException, DataAccessException, BadRequestException {
-
+    public void list(Context context) throws UnauthorizedException, DataAccessException {
+        ArrayList<GameData> games = new ArrayList<GameData>(service.list(context.header("Authorization")));
+        Map<String, Object> response = new HashMap<>();
+        response.put("games", games);
+        context.result(gson.toJson(response));
         context.status(200);
     }
 
