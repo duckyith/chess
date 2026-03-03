@@ -8,6 +8,8 @@ import models.AuthData;
 import models.User;
 import service.Service;
 
+import java.util.Map;
+
 public class Server {
     private final Service service;
     private final Gson gson = new Gson();
@@ -39,7 +41,7 @@ public class Server {
         javalin.stop();
     }
 
-    public void register(Context context) throws DataAccessException, AlreadyTakenException {
+    public void register(Context context) throws DataAccessException, BadRequestException, AlreadyTakenException {
         User user = gson.fromJson(context.body(), User.class);
         AuthData data = service.register(user);
         context.result(gson.toJson(data));
@@ -58,23 +60,23 @@ public class Server {
         context.status(200);
     }
 
-    public void clear(Context context) throws DataAccessException, UnauthorizedException {
+    public void clear(Context context) {
         service.clear();
         context.status(200);
     }
 
     public void takenException(AlreadyTakenException error, Context context) {
-        context.result(gson.toJson(error.getMessage()));
+        context.result(gson.toJson(Map.of("message", error.getMessage())));
         context.status(403);
     }
 
     public void unauthorizedException(UnauthorizedException error, Context context) {
-        context.result(gson.toJson(error.getMessage()));
+        context.result(gson.toJson(Map.of("message", error.getMessage())));
         context.status(401);
     }
 
     public void badException(BadRequestException error, Context context) {
-        context.result(gson.toJson(error.getMessage()));
+        context.result(gson.toJson(Map.of("message", error.getMessage())));
         context.status(400);
     }
 }

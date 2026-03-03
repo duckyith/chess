@@ -9,6 +9,7 @@ public class MemoryUserDAO implements UserDAO {
 
     Map<String, User> Users = new HashMap<>();
     Map<String, String> Tokens = new HashMap<>();
+    Map<String, String> Games = new HashMap<>();
 
     @Override
     public void register(User user) {
@@ -36,6 +37,10 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-
+    public void clear() {
+        Tokens.clear();
+        Users.clear();
+        Games.clear();
+    }
 
 }

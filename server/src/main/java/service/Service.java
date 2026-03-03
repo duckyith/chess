@@ -3,8 +3,6 @@ package service;
 import dataaccess.*;
 import models.AuthData;
 import models.User;
-
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class Service {
@@ -14,7 +12,10 @@ public class Service {
         this.userDAO = userDAO;
     }
 
-    public AuthData register (User user) throws DataAccessException, AlreadyTakenException {
+    public AuthData register (User user) throws DataAccessException, BadRequestException, AlreadyTakenException {
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
         if (userDAO.getUser(user.username()) != null){
             throw new AlreadyTakenException("Error: already taken");
         }
@@ -25,9 +26,12 @@ public class Service {
     }
 
     public AuthData login (User user) throws DataAccessException, BadRequestException, UnauthorizedException {
+        if (user.username() == null || user.password() == null) {
+            throw new BadRequestException("Error: bad request");
+        }
         User targetUser = userDAO.getUser(user.username());
         if (targetUser == null || userDAO.getToken(targetUser.username()) != null){
-            throw new BadRequestException("Error: bad request");
+            throw new UnauthorizedException("Error: unauthorized");
         }
         if (!targetUser.password().equals(user.password())){
             throw new UnauthorizedException("Error: unauthorized");
