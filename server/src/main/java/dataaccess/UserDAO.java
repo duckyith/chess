@@ -2,6 +2,7 @@ package dataaccess;
 
 import models.AuthData;
 import models.GameData;
+import models.JoinData;
 import models.UserData;
 
 import java.util.ArrayList;
@@ -14,5 +15,7 @@ public interface UserDAO {
     String getToken(String token) throws DataAccessException;
     void create(GameData game) throws DataAccessException;
     ArrayList<GameData> list() throws DataAccessException;
+    GameData getGame(String gameID);
+    void updateGame(GameData modifiedGame);
     void clear();
 }

@@ -6,8 +6,12 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import models.AuthData;
 import models.GameData;
+import models.JoinData;
 import models.UserData;
+import service.AlreadyTakenException;
+import service.BadRequestException;
 import service.Service;
+import service.UnauthorizedException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +35,7 @@ public class Server {
         javalin.delete("/db", this::clear);
         javalin.post("/game", this::create);
         javalin.get("/game", this::list);
-
+        javalin.put("/game", this::join);
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
@@ -79,10 +83,16 @@ public class Server {
     }
 
     public void list(Context context) throws UnauthorizedException, DataAccessException {
-        ArrayList<GameData> games = new ArrayList<GameData>(service.list(context.header("Authorization")));
+        ArrayList<GameData> games = new ArrayList<>(service.list(context.header("Authorization")));
         Map<String, Object> response = new HashMap<>();
         response.put("games", games);
         context.result(gson.toJson(response));
+        context.status(200);
+    }
+
+    public void join(Context context) throws DataAccessException, BadRequestException, AlreadyTakenException, UnauthorizedException {
+        JoinData request = gson.fromJson(context.body(), JoinData.class);
+        service.join(context.header("Authorization"),request);
         context.status(200);
     }
 

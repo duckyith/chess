@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataaccess.*;
 import models.AuthData;
 import models.GameData;
+import models.JoinData;
 import models.UserData;
 
 import java.util.ArrayList;
@@ -67,6 +68,32 @@ public class Service {
     public ArrayList<GameData> list(String authToken) throws UnauthorizedException, DataAccessException {
         authenticate(authToken);
         return userDAO.list();
+    }
+
+    public void join (String authToken, JoinData request) throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
+        authenticate(authToken);
+        String player = userDAO.getToken(authToken);
+        GameData game = userDAO.getGame(request.gameID());
+        String color = request.playerColor();
+
+        if (color == null ||
+                (!color.equals("WHITE") && !color.equals("BLACK"))
+                || request.gameID() == null
+                || game == null) {
+            throw new BadRequestException("Error: bad request");
+        }
+        if ((color.equals("WHITE") && game.whiteUsername() != null)
+                || (color.equals("BLACK") && game.blackUsername() != null)) {
+            throw new AlreadyTakenException("Error: already taken");
+        }
+        if (color.equals("WHITE")) {
+            GameData modifiedGame = new GameData(game.gameID(), player, game.blackUsername(), game.gameName(), game.game());
+            userDAO.updateGame(modifiedGame);
+        } else {
+            GameData modifiedGame = new GameData(game.gameID(), game.whiteUsername(), player, game.gameName(), game.game());
+            userDAO.updateGame(modifiedGame);
+        }
+
     }
 
     public void clear () {

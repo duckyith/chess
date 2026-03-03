@@ -2,6 +2,7 @@ package dataaccess;
 
 import models.AuthData;
 import models.GameData;
+import models.JoinData;
 import models.UserData;
 
 import java.util.*;
@@ -52,9 +53,19 @@ public class MemoryUserDAO implements UserDAO {
     public ArrayList<GameData> list() throws DataAccessException {
         ArrayList<GameData> games = new ArrayList<>();
         for (GameData game : Games.values()) {
-            games.add(new GameData(game.gameID(), game.blackUsername(), game.whiteUsername(), game.gameName(), null));
+            games.add(new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), null));
         }
         return games;
+    }
+
+    @Override
+    public GameData getGame(String gameID) {
+        return Games.get(gameID);
+    }
+
+    @Override
+    public void updateGame(GameData modifiedGame) {
+        Games.replace(Integer.toString(modifiedGame.gameID()), modifiedGame);
     }
 
     @Override
