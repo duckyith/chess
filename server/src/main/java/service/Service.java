@@ -48,7 +48,8 @@ public class Service {
         if (userDAO.getToken(authToken) == null){
             throw new UnauthorizedException("Error: unauthorized");
         }
-        userDAO.removeToken(userDAO.getToken(authToken));
+        System.out.println(authToken);
+        userDAO.removeToken(authToken);
     }
 
     public void clear () {

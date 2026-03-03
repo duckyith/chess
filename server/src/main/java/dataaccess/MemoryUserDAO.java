@@ -28,7 +28,13 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void removeToken(String token) throws DataAccessException {
+        System.out.println("token to be removed");
+        System.out.println(token);
+        System.out.println("should be here");
+        System.out.println(Tokens.get(token));
         Tokens.remove(token);
+        System.out.println("should NOT be here");
+        System.out.println(Tokens.get(token));
     }
 
     @Override
