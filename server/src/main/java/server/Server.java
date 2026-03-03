@@ -1,15 +1,11 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.AlreadyTakenException;
-import dataaccess.DataAccessException;
-import dataaccess.MemoryUserDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import models.AuthData;
 import models.User;
-import org.jetbrains.annotations.NotNull;
 import service.Service;
 
 public class Server {
@@ -25,7 +21,13 @@ public class Server {
 
         // Register your endpoints and exception handlers here.
         javalin.post("/user", this::register);
+        javalin.post("/session", this::login);
+        javalin.delete("/session", this::logout);
+        javalin.delete("/db", this::clear);
         javalin.exception(AlreadyTakenException.class, this::takenException);
+        javalin.exception(BadRequestException.class, this::badException);
+        javalin.exception(UnauthorizedException.class, this::unauthorizedException);
+
     }
 
     public int run(int desiredPort) {
@@ -44,8 +46,35 @@ public class Server {
         context.status(200);
     }
 
+    public void login(Context context) throws DataAccessException, BadRequestException, UnauthorizedException {
+        User user = gson.fromJson(context.body(), User.class);
+        AuthData data = service.login(user);
+        context.result(gson.toJson(data));
+        context.status(200);
+    }
+
+    public void logout(Context context) throws DataAccessException, UnauthorizedException {
+        service.logout(context.header("Authorization"));
+        context.status(200);
+    }
+
+    public void clear(Context context) throws DataAccessException, UnauthorizedException {
+        service.clear();
+        context.status(200);
+    }
+
     public void takenException(AlreadyTakenException error, Context context) {
         context.result(gson.toJson(error.getMessage()));
         context.status(403);
+    }
+
+    public void unauthorizedException(UnauthorizedException error, Context context) {
+        context.result(gson.toJson(error.getMessage()));
+        context.status(401);
+    }
+
+    public void badException(BadRequestException error, Context context) {
+        context.result(gson.toJson(error.getMessage()));
+        context.status(400);
     }
 }

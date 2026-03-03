@@ -2,8 +2,8 @@ package dataaccess;
 
 import models.AuthData;
 import models.User;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 public class MemoryUserDAO implements UserDAO {
 
@@ -12,21 +12,30 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public void register(User user) {
-        String userToAdd = user.username();
-        Users.put(userToAdd,user);
+        Users.put(user.username(),user);
+    }
+
+    @Override
+    public User getUser(String username) throws DataAccessException {
+        return Users.get(username);
     }
 
     @Override
     public void addToken(AuthData authData) {
-        Tokens.put(authData.username(), authData.authToken());
+        Tokens.put(authData.authToken(), authData.username());
     }
 
     @Override
-    public User get(String username) throws DataAccessException {
-        if (Users.containsKey(username)) {
-            return Users.get(username);
-        }
-        return null;
+    public void removeToken(String token) throws DataAccessException {
+        Tokens.remove(token);
     }
+
+    @Override
+    public String getToken(String token) throws DataAccessException {
+        return Tokens.get(token);
+    }
+
+    @Override
+
 
 }
