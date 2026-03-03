@@ -14,7 +14,7 @@
 <h1><span class="chess-icon">♔</span> CS 240 Chess Server</h1>
 <p>
     The CS 240 Chess Server Web API is described below. Some of the APIs require a request body to be sent (like
-    <code>/user/login</code> and <code>/user/register</code>), while others require an Authorization authToken
+    <code>/userData/login</code> and <code>/userData/register</code>), while others require an Authorization authToken
     (received at login). To view the required JSON format, click on a command below and look at the example request
     body. To try out an API, modify the request as needed, and press Send.
 </p>
@@ -24,10 +24,10 @@
     <tr>
         <td class="endpoint" onclick="register()">
             <div class="method">[POST]</div>
-            <div class="path">/user</div>
+            <div class="path">/userData</div>
         </td>
         <td>
-            <span class="description">Register a user</span> If successful, an authorization authToken is returned. You
+            <span class="description">Register a userData</span> If successful, an authorization authToken is returned. You
             may use the authToken with future requests that require authorization. No authorization authToken is
             required
             to call this endpoint.
@@ -39,7 +39,7 @@
             <div class="path">/session</div>
         </td>
         <td>
-            <span class="description">Log in a user</span> If successful, an authorization authToken is returned. You
+            <span class="description">Log in a userData</span> If successful, an authorization authToken is returned. You
             may
             use the authToken with future requests that require authorization. No authorization authToken is required to
             call this endpoint.
@@ -51,7 +51,7 @@
             <div class="path">/session</div>
         </td>
         <td>
-            <span class="description">Logs out an authenticated user</span> An authToken is required to call this
+            <span class="description">Logs out an authenticated userData</span> An authToken is required to call this
             endpoint.
         </td>
     </tr>
@@ -136,7 +136,7 @@
                 <div class="command">CONNECT</div>
             </td>
             <td>
-                <span class="description">Connect to game</span> Used for a user to request to connect to a game as a
+                <span class="description">Connect to game</span> Used for a userData to request to connect to a game as a
                 player or observer. Requires gameID and authToken.
             </td>
         </tr>

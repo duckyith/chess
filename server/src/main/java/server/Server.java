@@ -5,7 +5,8 @@ import dataaccess.*;
 import io.javalin.*;
 import io.javalin.http.Context;
 import models.AuthData;
-import models.User;
+import models.GameData;
+import models.UserData;
 import service.Service;
 
 import java.util.Map;
@@ -26,6 +27,7 @@ public class Server {
         javalin.post("/session", this::login);
         javalin.delete("/session", this::logout);
         javalin.delete("/db", this::clear);
+        javalin.post("/game", this::create);
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
@@ -42,15 +44,15 @@ public class Server {
     }
 
     public void register(Context context) throws DataAccessException, BadRequestException, AlreadyTakenException {
-        User user = gson.fromJson(context.body(), User.class);
-        AuthData data = service.register(user);
+        UserData userData = gson.fromJson(context.body(), UserData.class);
+        AuthData data = service.register(userData);
         context.result(gson.toJson(data));
         context.status(200);
     }
 
     public void login(Context context) throws DataAccessException, BadRequestException, UnauthorizedException {
-        User user = gson.fromJson(context.body(), User.class);
-        AuthData data = service.login(user);
+        UserData userData = gson.fromJson(context.body(), UserData.class);
+        AuthData data = service.login(userData);
         context.result(gson.toJson(data));
         context.status(200);
     }
@@ -62,6 +64,13 @@ public class Server {
 
     public void clear(Context context) {
         service.clear();
+        context.status(200);
+    }
+
+    public void create(Context context) throws UnauthorizedException, DataAccessException {
+        GameData game = gson.fromJson(context.body(), GameData.class);
+        GameData gameID = service.create(context.header("Authorization"),game);
+        context.result(gson.toJson(gameID));
         context.status(200);
     }
 

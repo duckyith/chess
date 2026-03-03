@@ -1,23 +1,24 @@
 package dataaccess;
 
 import models.AuthData;
-import models.User;
+import models.GameData;
+import models.UserData;
 
 import java.util.*;
 
 public class MemoryUserDAO implements UserDAO {
 
-    Map<String, User> Users = new HashMap<>();
+    Map<String, UserData> Users = new HashMap<>();
     Map<String, String> Tokens = new HashMap<>();
-    Map<String, String> Games = new HashMap<>();
+    Map<String, GameData> Games = new HashMap<>();
 
     @Override
-    public void register(User user) {
-        Users.put(user.username(),user);
+    public void register(UserData userData) {
+        Users.put(userData.username(), userData);
     }
 
     @Override
-    public User getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) throws DataAccessException {
         return Users.get(username);
     }
 
@@ -40,6 +41,11 @@ public class MemoryUserDAO implements UserDAO {
     @Override
     public String getToken(String token) throws DataAccessException {
         return Tokens.get(token);
+    }
+
+    @Override
+    public void create(GameData game) throws DataAccessException {
+        Games.put(game.gameName(), game);
     }
 
     @Override
