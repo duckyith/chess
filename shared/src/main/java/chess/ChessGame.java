@@ -149,13 +149,18 @@ public class ChessGame {
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 ChessPosition position = new ChessPosition(i,j);
-                if (game.getPiece(position) != null) {
-                    if (game.getPiece(position).getTeamColor() == teamColor) {
-                        if (!validMoves(position).isEmpty()) {
-                            return true;
-                        }
-                    }
+                if (anyValidMovesHelper(position, teamColor)){
+                    return true;
                 }
+            }
+        }
+        return false;
+    }
+
+    public boolean anyValidMovesHelper(ChessPosition position, TeamColor teamColor) {
+        if (game.getPiece(position) != null) {
+            if (game.getPiece(position).getTeamColor() == teamColor) {
+                return !validMoves(position).isEmpty();
             }
         }
         return false;
@@ -191,14 +196,21 @@ public class ChessGame {
         for (int i = 1; i < 9; i++){
             for (int j = 1; j < 9; j++){
                 checkingPosition = new ChessPosition(i,j);
-                if (game.getPiece(checkingPosition) != null && game.getPiece(checkingPosition).getTeamColor() != teamColor) {
-                    Collection<ChessMove> options = game.getPiece(checkingPosition).pieceMoves(game, checkingPosition);
-                    for (ChessMove option : options) {
-                        ChessPosition target = option.getEndPosition();
-                        if (target.equals(kingLocation)) {
-                            return true;
-                        }
-                    }
+                if (isInCheckHelper(checkingPosition, teamColor, kingLocation)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isInCheckHelper(ChessPosition checkingPosition, TeamColor teamColor, ChessPosition kingLocation){
+        if (game.getPiece(checkingPosition) != null && game.getPiece(checkingPosition).getTeamColor() != teamColor) {
+            Collection<ChessMove> options = game.getPiece(checkingPosition).pieceMoves(game, checkingPosition);
+            for (ChessMove option : options) {
+                ChessPosition target = option.getEndPosition();
+                if (target.equals(kingLocation)) {
+                    return true;
                 }
             }
         }
