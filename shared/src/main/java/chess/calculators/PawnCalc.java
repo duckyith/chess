@@ -26,8 +26,8 @@ public class PawnCalc {
                 options.addAll(new Valid(board, startPos, color, 1, -1).pawnCapCalc(true));
             } else {
                 options.addAll(new Valid(board, startPos, color, 1, 0).pawnMoveCalc(false));
-                if (startPos.getRow() == 2 && !options.isEmpty())
-                    options.addAll(new Valid(board, startPos, color, 2, 0).pawnMoveCalc(false));
+                if (startPos.getRow() == 2 && !options.isEmpty()) {
+                    options.addAll(new Valid(board, startPos, color, 2, 0).pawnMoveCalc(false));}
                 options.addAll(new Valid(board, startPos, color, 1, 1).pawnCapCalc(false));
                 options.addAll(new Valid(board, startPos, color, 1, -1).pawnCapCalc(false));
             }
@@ -38,8 +38,8 @@ public class PawnCalc {
                 options.addAll(new Valid(board, startPos, color, -1, -1).pawnCapCalc(true));
             } else {
                 options.addAll(new Valid(board, startPos, color, -1, 0).pawnMoveCalc(false));
-                if (startPos.getRow() == 7 && !options.isEmpty())
-                    options.addAll(new Valid(board, startPos, color, -2, 0).pawnMoveCalc(false));
+                if (startPos.getRow() == 7 && !options.isEmpty()) {
+                    options.addAll(new Valid(board, startPos, color, -2, 0).pawnMoveCalc(false));}
                 options.addAll(new Valid(board, startPos, color, -1, 1).pawnCapCalc(false));
                 options.addAll(new Valid(board, startPos, color, -1, -1).pawnCapCalc(false));
             }

@@ -70,7 +70,8 @@ public class Service {
         return userDAO.list();
     }
 
-    public void join (String authToken, JoinData request) throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
+    public void join (String authToken, JoinData request)
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         authenticate(authToken);
         String player = userDAO.getToken(authToken);
         GameData game = userDAO.getGame(request.gameID());
