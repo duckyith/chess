@@ -63,10 +63,10 @@ public class Valid {
         boolean out = target.getRow() >= 9 || target.getColumn() >= 9 || target.getRow() <= 0 || target.getColumn() <= 0;
         if (!out && board.getPiece(target) != null && board.getPiece(target).getTeamColor() != color) {
             if (promo) {
-                options.add(new ChessMove(startPos, target, ChessPiece.PieceType.BISHOP));
-                options.add(new ChessMove(startPos, target, ChessPiece.PieceType.ROOK));
                 options.add(new ChessMove(startPos, target, ChessPiece.PieceType.QUEEN));
                 options.add(new ChessMove(startPos, target, ChessPiece.PieceType.KNIGHT));
+                options.add(new ChessMove(startPos, target, ChessPiece.PieceType.BISHOP));
+                options.add(new ChessMove(startPos, target, ChessPiece.PieceType.ROOK));
             } else {
                 options.add(new ChessMove(startPos, target, null));
             }
