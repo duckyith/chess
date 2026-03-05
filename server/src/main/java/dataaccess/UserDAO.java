@@ -8,13 +8,13 @@ import models.UserData;
 import java.util.ArrayList;
 
 public interface UserDAO {
-    void register(UserData userData) throws DataAccessException;
-    UserData getUser(String username) throws DataAccessException;
-    void addToken(AuthData authData) throws DataAccessException;
-    void removeToken(String token) throws DataAccessException;
-    String getToken(String token) throws DataAccessException;
-    void create(GameData game) throws DataAccessException;
-    ArrayList<GameData> list() throws DataAccessException;
+    void register(UserData userData);
+    UserData getUser(String username);
+    void addToken(AuthData authData);
+    void removeToken(String token);
+    String getToken(String token);
+    void create(GameData game);
+    ArrayList<GameData> list();
     GameData getGame(String gameID);
     void updateGame(GameData modifiedGame);
     void clear();

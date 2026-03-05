@@ -18,7 +18,7 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public UserData getUser(String username) {
         return users.get(username);
     }
 
@@ -28,28 +28,22 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public void removeToken(String token) throws DataAccessException {
-        System.out.println("token to be removed");
-        System.out.println(token);
-        System.out.println("should be here");
-        System.out.println(tokens.get(token));
+    public void removeToken(String token) {
         tokens.remove(token);
-        System.out.println("should NOT be here");
-        System.out.println(tokens.get(token));
     }
 
     @Override
-    public String getToken(String token) throws DataAccessException {
+    public String getToken(String token) {
         return tokens.get(token);
     }
 
     @Override
-    public void create(GameData game) throws DataAccessException {
+    public void create(GameData game) {
         games.put(Integer.toString(game.gameID()), game);
     }
 
     @Override
-    public ArrayList<GameData> list() throws DataAccessException {
+    public ArrayList<GameData> list() {
         ArrayList<GameData> games = new ArrayList<>();
         for (GameData game : this.games.values()) {
             games.add(new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), null));

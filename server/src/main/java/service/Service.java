@@ -17,7 +17,7 @@ public class Service {
         this.userDAO = userDAO;
     }
 
-    public AuthData register (UserData userData) throws DataAccessException, BadRequestException, AlreadyTakenException {
+    public AuthData register (UserData userData) throws BadRequestException, AlreadyTakenException {
         if (userData.username() == null || userData.password() == null || userData.email() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -25,12 +25,12 @@ public class Service {
             throw new AlreadyTakenException("Error: already taken");
         }
         userDAO.register(userData);
-        AuthData authData = new AuthData(generateToken(), userData.username());
+        AuthData authData = new AuthData(UUID.randomUUID().toString(), userData.username());
         userDAO.addToken(authData);
         return authData;
     }
 
-    public AuthData login (UserData userData) throws DataAccessException, BadRequestException, UnauthorizedException {
+    public AuthData login (UserData userData) throws BadRequestException, UnauthorizedException {
         if (userData.username() == null || userData.password() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -41,12 +41,12 @@ public class Service {
         if (!targetUserData.password().equals(userData.password())){
             throw new UnauthorizedException("Error: unauthorized");
         }
-        AuthData authData = new AuthData(generateToken(), userData.username());
+        AuthData authData = new AuthData(UUID.randomUUID().toString(), userData.username());
         userDAO.addToken(authData);
         return authData;
     }
 
-    public void logout (String authToken) throws DataAccessException, UnauthorizedException {
+    public void logout (String authToken) throws UnauthorizedException {
         if (userDAO.getToken(authToken) == null){
             throw new UnauthorizedException("Error: unauthorized");
         }
@@ -54,7 +54,7 @@ public class Service {
         userDAO.removeToken(authToken);
     }
 
-    public GameData create(String authToken, GameData game) throws DataAccessException, UnauthorizedException, BadRequestException {
+    public GameData create(String authToken, GameData game) throws UnauthorizedException, BadRequestException {
         authenticate(authToken);
         if (game.gameName() == null) {
             throw new BadRequestException("Error: bad request");
@@ -65,13 +65,13 @@ public class Service {
         return new GameData(gameID,null,null,null,null);
     }
 
-    public ArrayList<GameData> list(String authToken) throws UnauthorizedException, DataAccessException {
+    public ArrayList<GameData> list(String authToken) throws UnauthorizedException {
         authenticate(authToken);
         return userDAO.list();
     }
 
     public void join (String authToken, JoinData request)
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException {
         authenticate(authToken);
         String player = userDAO.getToken(authToken);
         GameData game = userDAO.getGame(request.gameID());
@@ -101,13 +101,9 @@ public class Service {
         userDAO.clear();
     }
 
-    public void authenticate(String authToken) throws UnauthorizedException, DataAccessException{
+    public void authenticate(String authToken) throws UnauthorizedException {
         if (userDAO.getToken(authToken) == null) {
             throw new UnauthorizedException("Error: unauthorized");
         }
-    }
-
-    public static String generateToken() {
-        return UUID.randomUUID().toString();
     }
 }
