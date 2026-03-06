@@ -12,7 +12,7 @@ import org.junit.jupiter.api.*;
 
 import java.util.ArrayList;
 
-public class CustomTests {
+public class CustomServiceTests {
 
     UserDAO userDAO = new MemoryUserDAO();
     Service service = new Service(userDAO);
