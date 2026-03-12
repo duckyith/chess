@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
@@ -106,16 +107,29 @@ public class MYSQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void create(GameData gameData) throws DataAccessException, SQLException {
-        int gameID = gameData.gameID();
-        String whiteUsername = gameData.whiteUsername();
-        String blackUsername = gameData.blackUsername();
-        String gameName = gameData.gameName();
-        String game = gson.toJson(gameData.game());
+    public String getUserByToken(String token) throws DataAccessException, SQLException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "INSERT INTO games (gameID,whiteUsername,blackUsername,gameName,game) VALUES ('%s','%s','%s','%s','%s)"
-                    ,gameID,whiteUsername,blackUsername,gameName,game))) {
+                    "SELECT user FROM tokens WHERE token = '%s'"
+                    ,token))) {
+                var rs = statement.executeQuery();
+                if (rs.next()) {
+                    String test = rs.getString(1);
+                    return test;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void create(GameData gameData) throws DataAccessException, SQLException {
+        int gameID = gameData.gameID();
+        String game = gson.toJson(gameData);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "INSERT INTO games (gameID,gameData) VALUES (%d,'%s')"
+                    ,gameID,game))) {
                 statement.executeUpdate();
             }
         }
@@ -127,7 +141,18 @@ public class MYSQLUserDAO implements UserDAO {
     }
 
     @Override
-    public GameData getGame(String gameID) throws DataAccessException, SQLException {
+    public GameData getGame(String stringID) throws DataAccessException, SQLException {
+        int gameID = Integer.parseInt(stringID);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "SELECT gameID,gameData FROM games WHERE gameID = %d"
+                    ,gameID))) {
+                var rs = statement.executeQuery();
+                if (rs.next()) {
+                    return gson.fromJson(rs.getString(2), GameData.class);
+                }
+            }
+        }
         return null;
     }
 
@@ -135,20 +160,17 @@ public class MYSQLUserDAO implements UserDAO {
     public void updateGame(GameData gameData) throws DataAccessException, SQLException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "DELETE FROM games WHERE gameID = '%s'"
+                    "DELETE FROM games WHERE gameID = %d"
                     ,gameData.gameID()))) {
                 statement.executeUpdate();
             }
         }
         int gameID = gameData.gameID();
-        String whiteUsername = gameData.whiteUsername();
-        String blackUsername = gameData.blackUsername();
-        String gameName = gameData.gameName();
-        String game = gson.toJson(gameData.game());
+        String game = gson.toJson(gameData);
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "INSERT INTO games (gameID,whiteUsername,blackUsername,gameName,game) VALUES ('%s','%s','%s','%s','%s)"
-                    ,gameID,whiteUsername,blackUsername,gameName,game))) {
+                    "INSERT INTO games (gameID,gameData) VALUES (%d,'%s')"
+                    ,gameID,game))) {
                 statement.executeUpdate();
             }
         }
@@ -165,6 +187,12 @@ public class MYSQLUserDAO implements UserDAO {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(new String(
                     "TRUNCATE TABLE tokens"))) {
+                statement.executeUpdate();
+            }
+        }
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(new String(
+                    "TRUNCATE TABLE games"))) {
                 statement.executeUpdate();
             }
         }
@@ -189,10 +217,7 @@ public class MYSQLUserDAO implements UserDAO {
             """
             CREATE TABLE IF NOT EXISTS  games (
               `gameID` INT NOT NULL,
-              `whiteUsername` varchar(256),
-              `blackUsername` varchar(256),
-              `gameName` varchar(256) NOT NULL,
-              `game` TEXT NOT NULL,
+              `gameData` TEXT NOT NULL,
               PRIMARY KEY (`gameID`)
             )
             """

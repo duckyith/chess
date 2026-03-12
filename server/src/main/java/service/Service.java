@@ -80,7 +80,7 @@ public class Service {
     public void join (String authToken, JoinData request)
             throws BadRequestException, AlreadyTakenException, UnauthorizedException, SQLException, DataAccessException {
         authenticate(authToken);
-        String player = userDAO.getToken(authToken);
+        String player = userDAO.getUserByToken(authToken);
         GameData game = userDAO.getGame(request.gameID());
         String color = request.playerColor();
 

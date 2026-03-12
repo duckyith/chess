@@ -40,7 +40,12 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public String getTokenByUser(String user) {
-        return "";
+        return "uhOh";
+    }
+
+    @Override
+    public String getUserByToken(String user) throws DataAccessException, SQLException {
+        return "uhOh";
     }
 
     @Override
