@@ -13,6 +13,7 @@ import service.BadRequestException;
 import service.Service;
 import service.UnauthorizedException;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +23,8 @@ public class Server {
     private final Gson gson = new Gson();
     private final Javalin javalin;
 
-    public Server() {
-        UserDAO userDAO = new MemoryUserDAO();
+    public Server() throws SQLException, DataAccessException {
+        UserDAO userDAO = new MYSQLUserDAO();
         service = new Service(userDAO);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
@@ -51,38 +52,43 @@ public class Server {
         javalin.stop();
     }
 
-    public void register(Context context) throws DataAccessException, BadRequestException, AlreadyTakenException {
+    public void register(Context context)
+            throws DataAccessException, BadRequestException, AlreadyTakenException, SQLException {
         UserData userData = gson.fromJson(context.body(), UserData.class);
         AuthData data = service.register(userData);
         context.result(gson.toJson(data));
         context.status(200);
     }
 
-    public void login(Context context) throws DataAccessException, BadRequestException, UnauthorizedException {
+    public void login(Context context)
+            throws DataAccessException, BadRequestException, UnauthorizedException, SQLException {
         UserData userData = gson.fromJson(context.body(), UserData.class);
         AuthData data = service.login(userData);
         context.result(gson.toJson(data));
         context.status(200);
     }
 
-    public void logout(Context context) throws DataAccessException, UnauthorizedException {
+    public void logout(Context context)
+            throws DataAccessException, UnauthorizedException, SQLException {
         service.logout(context.header("Authorization"));
         context.status(200);
     }
 
-    public void clear(Context context) {
+    public void clear(Context context) throws SQLException, DataAccessException {
         service.clear();
         context.status(200);
     }
 
-    public void create(Context context) throws UnauthorizedException, DataAccessException, BadRequestException {
+    public void create(Context context)
+            throws UnauthorizedException, DataAccessException, BadRequestException, SQLException {
         GameData game = gson.fromJson(context.body(), GameData.class);
         GameData gameID = service.create(context.header("Authorization"),game);
         context.result(gson.toJson(gameID));
         context.status(200);
     }
 
-    public void list(Context context) throws UnauthorizedException, DataAccessException {
+    public void list(Context context)
+            throws UnauthorizedException, DataAccessException, SQLException {
         ArrayList<GameData> games = new ArrayList<>(service.list(context.header("Authorization")));
         Map<String, Object> response = new HashMap<>();
         response.put("games", games);
@@ -90,7 +96,8 @@ public class Server {
         context.status(200);
     }
 
-    public void join(Context context) throws DataAccessException, BadRequestException, AlreadyTakenException, UnauthorizedException {
+    public void join(Context context)
+            throws DataAccessException, BadRequestException, AlreadyTakenException, UnauthorizedException, SQLException {
         JoinData request = gson.fromJson(context.body(), JoinData.class);
         service.join(context.header("Authorization"),request);
         context.status(200);
