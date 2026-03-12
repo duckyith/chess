@@ -14,9 +14,10 @@ public interface UserDAO {
     void addToken(AuthData authData) throws SQLException, DataAccessException;
     void removeToken(String token) throws DataAccessException, SQLException;
     String getToken(String token) throws DataAccessException, SQLException;
-    void create(GameData game);
-    ArrayList<GameData> list();
-    GameData getGame(String gameID);
-    void updateGame(GameData modifiedGame);
+    String getTokenByUser(String user) throws DataAccessException, SQLException;
+    void create(GameData game) throws DataAccessException, SQLException;
+    ArrayList<GameData> list() throws DataAccessException, SQLException;
+    GameData getGame(String gameID) throws DataAccessException, SQLException;
+    void updateGame(GameData modifiedGame) throws DataAccessException, SQLException;
     void clear() throws DataAccessException, SQLException;
 }

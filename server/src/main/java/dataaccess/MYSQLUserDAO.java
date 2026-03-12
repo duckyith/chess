@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
 import models.UserData;
@@ -11,6 +12,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class MYSQLUserDAO implements UserDAO {
+
+    private final Gson gson = new Gson();
 
     public MYSQLUserDAO () throws DataAccessException, SQLException {
         configureDatabase();
@@ -34,11 +37,12 @@ public class MYSQLUserDAO implements UserDAO {
     public UserData getUser(String username) throws DataAccessException, SQLException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "SELECT username FROM users WHERE username = '%s'"
+                    "SELECT username, password FROM users WHERE username = '%s'"
                     ,username))) {
                 var rs = statement.executeQuery();
                 if (rs.next()) {
-                    return new UserData(rs.getString(1), rs.getString(2), rs.getString(3));
+                    UserData userData = new UserData(rs.getString(1), rs.getString(2),null);
+                    return userData;
                 }
             }
         }
@@ -62,7 +66,7 @@ public class MYSQLUserDAO implements UserDAO {
     public void removeToken(String token) throws DataAccessException, SQLException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "DELETE FROM tokens WHERE token = '%s')"
+                    "DELETE FROM tokens WHERE token = '%s'"
                     ,token))) {
                 statement.executeUpdate();
             }
@@ -77,7 +81,8 @@ public class MYSQLUserDAO implements UserDAO {
                     ,token))) {
                 var rs = statement.executeQuery();
                 if (rs.next()) {
-                    return rs.getString(1);
+                    String test = rs.getString(1);
+                    return test;
                 }
             }
         }
@@ -85,23 +90,68 @@ public class MYSQLUserDAO implements UserDAO {
     }
 
     @Override
-    public void create(GameData game) {
-
-    }
-
-    @Override
-    public ArrayList<GameData> list() {
+    public String getTokenByUser(String user) throws DataAccessException, SQLException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "SELECT token FROM tokens WHERE user = '%s'"
+                    ,user))) {
+                var rs = statement.executeQuery();
+                if (rs.next()) {
+                    String test = rs.getString(1);
+                    return test;
+                }
+            }
+        }
         return null;
     }
 
     @Override
-    public GameData getGame(String gameID) {
+    public void create(GameData gameData) throws DataAccessException, SQLException {
+        int gameID = gameData.gameID();
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+        String gameName = gameData.gameName();
+        String game = gson.toJson(gameData.game());
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "INSERT INTO games (gameID,whiteUsername,blackUsername,gameName,game) VALUES ('%s','%s','%s','%s','%s)"
+                    ,gameID,whiteUsername,blackUsername,gameName,game))) {
+                statement.executeUpdate();
+            }
+        }
+    }
+
+    @Override
+    public ArrayList<GameData> list() throws DataAccessException, SQLException {
         return null;
     }
 
     @Override
-    public void updateGame(GameData modifiedGame) {
+    public GameData getGame(String gameID) throws DataAccessException, SQLException {
+        return null;
+    }
 
+    @Override
+    public void updateGame(GameData gameData) throws DataAccessException, SQLException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "DELETE FROM games WHERE gameID = '%s'"
+                    ,gameData.gameID()))) {
+                statement.executeUpdate();
+            }
+        }
+        int gameID = gameData.gameID();
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+        String gameName = gameData.gameName();
+        String game = gson.toJson(gameData.game());
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "INSERT INTO games (gameID,whiteUsername,blackUsername,gameName,game) VALUES ('%s','%s','%s','%s','%s)"
+                    ,gameID,whiteUsername,blackUsername,gameName,game))) {
+                statement.executeUpdate();
+            }
+        }
     }
 
     @Override
@@ -134,6 +184,16 @@ public class MYSQLUserDAO implements UserDAO {
               `token` varchar(256) NOT NULL,
               `user` varchar(256) NOT NULL,
               PRIMARY KEY (`token`)
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS  games (
+              `gameID` INT NOT NULL,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `game` TEXT NOT NULL,
+              PRIMARY KEY (`gameID`)
             )
             """
     };

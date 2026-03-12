@@ -4,6 +4,7 @@ import models.AuthData;
 import models.GameData;
 import models.UserData;
 
+import java.sql.SQLException;
 import java.util.*;
 
 public class MemoryUserDAO implements UserDAO {
@@ -35,6 +36,11 @@ public class MemoryUserDAO implements UserDAO {
     @Override
     public String getToken(String token) {
         return tokens.get(token);
+    }
+
+    @Override
+    public String getTokenByUser(String user) {
+        return "";
     }
 
     @Override

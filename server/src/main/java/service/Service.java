@@ -6,6 +6,7 @@ import models.AuthData;
 import models.GameData;
 import models.JoinData;
 import models.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,10 +39,10 @@ public class Service {
             throw new BadRequestException("Error: bad request");
         }
         UserData targetUserData = userDAO.getUser(userData.username());
-        if (targetUserData == null || userDAO.getToken(targetUserData.username()) != null){
+        if (targetUserData == null || userDAO.getTokenByUser(targetUserData.username()) != null){
             throw new UnauthorizedException("Error: unauthorized");
         }
-        if (!targetUserData.password().equals(userData.password())){
+        if (!BCrypt.checkpw(userData.password(), targetUserData.password())){
             throw new UnauthorizedException("Error: unauthorized");
         }
         AuthData authData = new AuthData(UUID.randomUUID().toString(), userData.username());
