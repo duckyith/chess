@@ -10,6 +10,7 @@ import models.JoinData;
 import models.UserData;
 import org.junit.jupiter.api.*;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CustomServiceTests {
@@ -17,15 +18,17 @@ public class CustomServiceTests {
     UserDAO userDAO = new MemoryUserDAO();
     Service service = new Service(userDAO);
 
+    //WARNING: THESE TESTS CLEAR THE DATA BASE!!! D:
     @BeforeEach
-    public void clearDB() {
+    public void clearDB() throws SQLException, DataAccessException {
         userDAO.clear();
     }
 
     //Register
     @Test
     @DisplayName("Register S")
-    public void registerSuccess() throws BadRequestException, DataAccessException, AlreadyTakenException {
+    public void registerSuccess()
+            throws SQLException, BadRequestException, DataAccessException, AlreadyTakenException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = new AuthData("doesntmatter","username");
         AuthData result = service.register(userData);
@@ -44,7 +47,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Login S")
     public void loginSuccess()
-            throws BadRequestException, DataAccessException, UnauthorizedException, AlreadyTakenException {
+            throws SQLException, BadRequestException, DataAccessException, UnauthorizedException, AlreadyTakenException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData authdata = service.register(userData);
         service.logout(authdata.authToken());
@@ -55,7 +58,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Login F")
     public void loginFail()
-            throws BadRequestException, DataAccessException, AlreadyTakenException, UnauthorizedException {
+            throws SQLException, BadRequestException, DataAccessException, AlreadyTakenException, UnauthorizedException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData authdata = service.register(userData);
         UserData wrongData = new UserData("username","notPassword","username@gmail.com");
@@ -67,7 +70,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Logout S")
     public void logoutSuccess()
-            throws BadRequestException, DataAccessException, AlreadyTakenException, UnauthorizedException {
+            throws SQLException, BadRequestException, DataAccessException, AlreadyTakenException, UnauthorizedException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData authdata = service.register(userData);
         service.logout(authdata.authToken());
@@ -84,7 +87,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Create S")
     public void createSuccess()
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+            throws SQLException, BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = service.register(userData);
         GameData game = new GameData(1234,null,null,"GameName",new ChessGame());
@@ -95,7 +98,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Create F")
     public void createFail()
-        throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+            throws SQLException, BadRequestException, AlreadyTakenException, DataAccessException {
             UserData userData = new UserData("username","password","username@gmail.com");
             AuthData auth = service.register(userData);
             GameData game = new GameData(1234,null,null,null,new ChessGame());
@@ -106,7 +109,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("List S")
     public void listSuccess()
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException, SQLException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = service.register(userData);
         GameData game = new GameData(1234,null,null,"GameName",new ChessGame());
@@ -118,7 +121,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("List F")
     public void listFail()
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException, SQLException, DataAccessException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = service.register(userData);
         GameData game = new GameData(1234,null,null,"GameName",new ChessGame());
@@ -130,7 +133,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Join S")
     public void joinSuccess()
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException, SQLException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = service.register(userData);
         GameData game = new GameData(1234,null,null,"GameName",new ChessGame());
@@ -144,7 +147,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Join F")
     public void joinFail()
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException, SQLException, DataAccessException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData auth = service.register(userData);
         GameData game = new GameData(1234,null,null,"GameName",new ChessGame());
@@ -156,7 +159,7 @@ public class CustomServiceTests {
     //Clear
     @Test
     @DisplayName("Clear S")
-    public void clearSuccess() throws BadRequestException, DataAccessException, AlreadyTakenException {
+    public void clearSuccess() throws BadRequestException, DataAccessException, AlreadyTakenException, SQLException {
         UserData userData = new UserData("username","password","username@gmail.com");
         service.register(userData);
         service.clear();
@@ -165,7 +168,7 @@ public class CustomServiceTests {
 
     @Test
     @DisplayName("Clear S") //I don't know if I can write a negative test for clear
-    public void clearSuccess2() throws BadRequestException, DataAccessException, AlreadyTakenException {
+    public void clearSuccess2() throws BadRequestException, DataAccessException, AlreadyTakenException, SQLException {
         UserData userData = new UserData("username","password","username@gmail.com");
         service.register(userData);
         service.clear();
@@ -176,7 +179,7 @@ public class CustomServiceTests {
     @Test
     @DisplayName("Auth S")
     public void authSuccess()
-            throws BadRequestException, AlreadyTakenException {
+            throws BadRequestException, AlreadyTakenException, SQLException, DataAccessException {
         UserData userData = new UserData("username","password","username@gmail.com");
         String auth = service.register(userData).authToken();
         Assertions.assertDoesNotThrow(() -> service.authenticate(auth));
