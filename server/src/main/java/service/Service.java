@@ -39,7 +39,7 @@ public class Service {
             throw new BadRequestException("Error: bad request");
         }
         UserData targetUserData = userDAO.getUser(userData.username());
-        if (targetUserData == null || userDAO.getTokenByUser(targetUserData.username()) != null){
+        if (targetUserData == null || userDAO.getTokenByUser(userData.username()) == null){
             throw new UnauthorizedException("Error: unauthorized");
         }
         if (!BCrypt.checkpw(userData.password(), targetUserData.password())){

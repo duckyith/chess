@@ -40,6 +40,7 @@ public class Server {
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
+        javalin.exception(DataAccessException.class, this::dataAccessException);
 
     }
 
@@ -116,5 +117,10 @@ public class Server {
     public void badException(BadRequestException error, Context context) {
         context.result(gson.toJson(Map.of("message", error.getMessage())));
         context.status(400);
+    }
+
+    public void dataAccessException(DataAccessException error, Context context) {
+        context.result(gson.toJson(Map.of("message", "Internal Server Error")));
+        context.status(500);
     }
 }
