@@ -23,7 +23,7 @@ public class Server {
     private final Gson gson = new Gson();
     private final Javalin javalin;
 
-    public Server() throws SQLException, DataAccessException {
+    public Server() {
         UserDAO userDAO = new MYSQLUserDAO();
         service = new Service(userDAO);
 
@@ -40,8 +40,11 @@ public class Server {
         javalin.exception(AlreadyTakenException.class, this::takenException);
         javalin.exception(BadRequestException.class, this::badException);
         javalin.exception(UnauthorizedException.class, this::unauthorizedException);
-        javalin.exception(DataAccessException.class, this::dataAccessException);
 
+        javalin.exception(Exception.class, (error, ctx) -> {
+            ctx.status(500);
+            ctx.result(gson.toJson(Map.of("message", "Internal Server Error: " + error.getMessage())));
+        });
     }
 
     public int run(int desiredPort) {
@@ -81,7 +84,7 @@ public class Server {
     }
 
     public void create(Context context)
-            throws UnauthorizedException, DataAccessException, BadRequestException, SQLException {
+            throws UnauthorizedException, BadRequestException {
         GameData game = gson.fromJson(context.body(), GameData.class);
         GameData gameID = service.create(context.header("Authorization"),game);
         context.result(gson.toJson(gameID));
@@ -89,7 +92,7 @@ public class Server {
     }
 
     public void list(Context context)
-            throws UnauthorizedException, DataAccessException, SQLException {
+            throws UnauthorizedException  {
         ArrayList<GameData> games = new ArrayList<>(service.list(context.header("Authorization")));
         Map<String, Object> response = new HashMap<>();
         response.put("games", games);
@@ -117,10 +120,5 @@ public class Server {
     public void badException(BadRequestException error, Context context) {
         context.result(gson.toJson(Map.of("message", error.getMessage())));
         context.status(400);
-    }
-
-    public void dataAccessException(DataAccessException error, Context context) {
-        context.result(gson.toJson(Map.of("message", "Internal Server Error")));
-        context.status(500);
     }
 }

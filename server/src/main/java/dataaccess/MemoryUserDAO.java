@@ -44,7 +44,7 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public String getUserByToken(String user) throws DataAccessException, SQLException {
+    public String getUserByToken(String user) {
         return "uhOh";
     }
 

@@ -20,7 +20,7 @@ public class Service {
     }
 
     public AuthData register (UserData userData)
-            throws BadRequestException, AlreadyTakenException, DataAccessException, SQLException {
+            throws BadRequestException, AlreadyTakenException {
         if (userData.username() == null || userData.password() == null || userData.email() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -34,7 +34,7 @@ public class Service {
     }
 
     public AuthData login (UserData userData)
-            throws BadRequestException, UnauthorizedException, SQLException, DataAccessException {
+            throws BadRequestException, UnauthorizedException {
         if (userData.username() == null || userData.password() == null) {
             throw new BadRequestException("Error: bad request");
         }
@@ -51,7 +51,7 @@ public class Service {
     }
 
     public void logout (String authToken)
-            throws UnauthorizedException, SQLException, DataAccessException {
+            throws UnauthorizedException {
         if (userDAO.getToken(authToken) == null){
             throw new UnauthorizedException("Error: unauthorized");
         }
@@ -60,7 +60,7 @@ public class Service {
     }
 
     public GameData create(String authToken, GameData game)
-            throws UnauthorizedException, BadRequestException, SQLException, DataAccessException {
+            throws UnauthorizedException, BadRequestException {
         authenticate(authToken);
         if (game.gameName() == null) {
             throw new BadRequestException("Error: bad request");
@@ -72,13 +72,13 @@ public class Service {
     }
 
     public ArrayList<GameData> list(String authToken)
-            throws UnauthorizedException, SQLException, DataAccessException {
+            throws UnauthorizedException {
         authenticate(authToken);
         return userDAO.list();
     }
 
     public void join (String authToken, JoinData request)
-            throws BadRequestException, AlreadyTakenException, UnauthorizedException, SQLException, DataAccessException {
+            throws BadRequestException, AlreadyTakenException, UnauthorizedException {
         authenticate(authToken);
         String player = userDAO.getUserByToken(authToken);
         GameData game = userDAO.getGame(request.gameID());
@@ -109,7 +109,7 @@ public class Service {
     }
 
     public void authenticate(String authToken)
-            throws UnauthorizedException, SQLException, DataAccessException {
+            throws UnauthorizedException {
         if (userDAO.getToken(authToken) == null) {
             throw new UnauthorizedException("Error: unauthorized");
         }
