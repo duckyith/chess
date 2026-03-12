@@ -137,6 +137,21 @@ public class MYSQLUserDAO implements UserDAO {
 
     @Override
     public ArrayList<GameData> list() throws DataAccessException, SQLException {
+        ArrayList<GameData> games = new ArrayList<>();
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var statement = conn.prepareStatement(String.format(
+                    "SELECT gameData FROM games"))) {
+                var rs = statement.executeQuery();
+                GameData gameDisplay;
+                GameData tempGame;
+                while (rs.next()) {
+                    tempGame = gson.fromJson(rs.getString(1), GameData.class);
+                    gameDisplay = new GameData(tempGame.gameID(), tempGame.whiteUsername(), tempGame.blackUsername(), tempGame.gameName(), null);
+                    games.add(gameDisplay);
+                }
+                if(!games.isEmpty()){return games;};
+            }
+        }
         return null;
     }
 
