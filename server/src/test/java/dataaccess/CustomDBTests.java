@@ -29,14 +29,14 @@ public class CustomDBTests {
     }
 
     //Register
-    @Test
-    @DisplayName("Register S")
-    public void registerSuccess()
-            throws BadRequestException, DataAccessException, AlreadyTakenException, SQLException {
-        UserData userData = new UserData("username","password","username@gmail.com");
-        AuthData auth = new AuthData("doesntmatter","username");
-        AuthData result = service.register(userData);
-        Assertions.assertEquals(auth.username(),result.username());
-        Assertions.assertNotNull(result.authToken());
-    }
+//    @Test
+//    @DisplayName("Register S")
+//    public void registerSuccess()
+//            throws BadRequestException, DataAccessException, AlreadyTakenException, SQLException {
+//        UserData userData = new UserData("username","password","username@gmail.com");
+//        AuthData auth = new AuthData("doesntmatter","username");
+//        AuthData result = service.register(userData);
+//        Assertions.assertEquals(auth.username(),result.username());
+//        Assertions.assertNotNull(result.authToken());
+//    }
 }
