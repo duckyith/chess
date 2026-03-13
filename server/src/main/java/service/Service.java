@@ -39,7 +39,7 @@ public class Service {
             throw new BadRequestException("Error: bad request");
         }
         UserData targetUserData = userDAO.getUser(userData.username());
-        if (targetUserData == null || userDAO.getTokenByUser(userData.username()) == null){
+        if (targetUserData == null){
             throw new UnauthorizedException("Error: unauthorized");
         }
         if (!BCrypt.checkpw(userData.password(), targetUserData.password())){
@@ -84,9 +84,9 @@ public class Service {
         GameData game = userDAO.getGame(request.gameID());
         String color = request.playerColor();
 
-        if (color == null ||
-                (!color.equals("WHITE") && !color.equals("BLACK"))
+        if (color == null
                 || request.gameID() == null
+                || (!color.equals("WHITE") && !color.equals("BLACK"))
                 || game == null) {
             throw new BadRequestException("Error: bad request");
         }

@@ -39,11 +39,6 @@ public class MemoryUserDAO implements UserDAO {
     }
 
     @Override
-    public String getTokenByUser(String user) {
-        return "uhOh";
-    }
-
-    @Override
     public String getUserByToken(String user) {
         return "uhOh";
     }

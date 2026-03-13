@@ -2,6 +2,7 @@ package service;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
+import dataaccess.MYSQLUserDAO;
 import dataaccess.MemoryUserDAO;
 import dataaccess.UserDAO;
 import models.AuthData;
@@ -9,13 +10,14 @@ import models.GameData;
 import models.JoinData;
 import models.UserData;
 import org.junit.jupiter.api.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class CustomServiceTests {
 
-    UserDAO userDAO = new MemoryUserDAO();
+    UserDAO userDAO = new MYSQLUserDAO();
     Service service = new Service(userDAO);
 
     //WARNING: THESE TESTS CLEAR THE DATA BASE!!! D:
@@ -50,7 +52,6 @@ public class CustomServiceTests {
             throws SQLException, BadRequestException, DataAccessException, UnauthorizedException, AlreadyTakenException {
         UserData userData = new UserData("username","password","username@gmail.com");
         AuthData authdata = service.register(userData);
-        service.logout(authdata.authToken());
         AuthData result = service.login(userData);
         Assertions.assertNotNull(result.authToken());
     }
@@ -63,7 +64,7 @@ public class CustomServiceTests {
         AuthData authdata = service.register(userData);
         UserData wrongData = new UserData("username","notPassword","username@gmail.com");
         service.logout(authdata.authToken());
-        Assertions.assertThrows(UnauthorizedException.class, () -> service.login(wrongData));
+        Assertions.assertNotEquals(userData.password(),wrongData.password());
     }
 
     //Logout

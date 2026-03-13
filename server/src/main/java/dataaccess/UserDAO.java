@@ -14,7 +14,6 @@ public interface UserDAO {
     void addToken(AuthData authData);
     void removeToken(String token);
     String getToken(String token);
-    String getTokenByUser(String user);
     String getUserByToken (String token);
     void create(GameData game);
     ArrayList<GameData> list();

@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import models.AuthData;
 import models.GameData;
@@ -97,23 +98,6 @@ public class MYSQLUserDAO implements UserDAO {
     }
 
     @Override
-    public String getTokenByUser(String user) {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement(String.format(
-                    "SELECT token FROM tokens WHERE user = '%s'"
-                    ,user))) {
-                var rs = statement.executeQuery();
-                if (rs.next()) {
-                    return rs.getString(1);
-                }
-            }
-        } catch (DataAccessException | SQLException e) {
-            throw new RuntimeException("Internal Server Error",e);
-        }
-        return null;
-    }
-
-    @Override
     public String getUserByToken(String token) {
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
@@ -133,11 +117,14 @@ public class MYSQLUserDAO implements UserDAO {
     @Override
     public void create(GameData gameData) {
         int gameID = gameData.gameID();
-        String game = gson.toJson(gameData);
+        String gameName = gameData.gameName();
+        String game = gson.toJson(gameData.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement(String.format(
-                    "INSERT INTO games (gameID,gameData) VALUES (%d,'%s')"
-                    ,gameID,game))) {
+            try (var statement = conn.prepareStatement(
+                    "INSERT INTO games (gameID,gameName,game) VALUES (?,?,?)")) {
+                statement.setInt(1, gameID);
+                statement.setString(2, gameName);
+                statement.setString(3, game);
                 statement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
@@ -150,33 +137,34 @@ public class MYSQLUserDAO implements UserDAO {
         ArrayList<GameData> games = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "SELECT gameData FROM games"))) {
+                    "SELECT gameID,whiteUsername,blackUsername,gameName FROM games"))) {
                 var rs = statement.executeQuery();
                 GameData gameDisplay;
-                GameData tempGame;
                 while (rs.next()) {
-                    tempGame = gson.fromJson(rs.getString(1), GameData.class);
-                    gameDisplay = new GameData(tempGame.gameID(), tempGame.whiteUsername(), tempGame.blackUsername(), tempGame.gameName(), null);
+                    gameDisplay = new GameData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), null);
                     games.add(gameDisplay);
                 }
-                if(!games.isEmpty()){return games;};
+                return games;
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException("Internal Server Error",e);
         }
-        return null;
     }
 
     @Override
     public GameData getGame(String stringID) {
-        int gameID = Integer.parseInt(stringID);
+        int gameID;
+        if (stringID != null) {
+            gameID = Integer.parseInt(stringID);
+        } else {return null;}
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "SELECT gameID,gameData FROM games WHERE gameID = %d"
+                    "SELECT gameID,whiteUsername,blackUsername,gameName,game FROM games WHERE gameID = %d"
                     ,gameID))) {
                 var rs = statement.executeQuery();
                 if (rs.next()) {
-                    return gson.fromJson(rs.getString(2), GameData.class);
+                    ChessGame game = gson.fromJson(rs.getString(5), ChessGame.class);
+                    return new GameData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), game);
                 }
             }
         } catch (DataAccessException | SQLException e) {
@@ -197,11 +185,18 @@ public class MYSQLUserDAO implements UserDAO {
             throw new RuntimeException("Internal Server Error",e);
         }
         int gameID = gameData.gameID();
-        String game = gson.toJson(gameData);
+        String whiteUsername = gameData.whiteUsername();
+        String blackUsername = gameData.blackUsername();
+        String gameName = gameData.gameName();
+        String game = gson.toJson(gameData.game());
         try (var conn = DatabaseManager.getConnection()) {
-            try (var statement = conn.prepareStatement(String.format(
-                    "INSERT INTO games (gameID,gameData) VALUES (%d,'%s')"
-                    ,gameID,game))) {
+            try (var statement = conn.prepareStatement(
+                    "INSERT INTO games (gameID,whiteUserName,blackUsername,gameName,game) VALUES (?,?,?,?,?)")) {
+                statement.setInt(1, gameID);
+                statement.setString(2, whiteUsername);
+                statement.setString(3, blackUsername);
+                statement.setString(4, gameName);
+                statement.setString(5, game);
                 statement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
@@ -256,7 +251,10 @@ public class MYSQLUserDAO implements UserDAO {
             """
             CREATE TABLE IF NOT EXISTS  games (
               `gameID` INT NOT NULL,
-              `gameData` TEXT NOT NULL,
+              `whiteUsername` varchar(256) DEFAULT NULL,
+              `blackUsername` varchar(256) DEFAULT NULL,
+              `gameName` varchar(256) NOT NULL,
+              `game` TEXT NOT NULL,
               PRIMARY KEY (`gameID`)
             )
             """
