@@ -137,11 +137,12 @@ public class MYSQLUserDAO implements UserDAO {
         ArrayList<GameData> games = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             try (var statement = conn.prepareStatement(String.format(
-                    "SELECT gameID,whiteUsername,blackUsername,gameName FROM games"))) {
+                    "SELECT gameID,whiteUsername,blackUsername,gameName,game FROM games"))) {
                 var rs = statement.executeQuery();
                 GameData gameDisplay;
                 while (rs.next()) {
-                    gameDisplay = new GameData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), null);
+                    ChessGame game = gson.fromJson(rs.getString(5), ChessGame.class);
+                    gameDisplay = new GameData(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), game);
                     games.add(gameDisplay);
                 }
                 return games;

@@ -11,7 +11,6 @@ public class REPL {
     public String username = null;
     public String authToken = null;
     public State state = State.SIGNEDOUT;
-    public State nextState;
     LoggedOutClient loggedOutClient;
     LoggedInClient loggedInClient;
 

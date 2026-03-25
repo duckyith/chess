@@ -20,17 +20,18 @@ public class DrawBoard {
                     board += SET_BG_COLOR_WHITE;
                     board = pickBGLetter(board, i, j);
                 } else {
-                    if (i % 2 == 0 && j % 2 == 0){
+                    if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)){
                         board += SET_BG_COLOR_LIGHT_GREY;
                     } else {board += SET_BG_COLOR_DARK_GREY;}
                     if (game.getBoard().getPiece(new ChessPosition(i, j)) == null) {
-                        board += " ";
+                        board += EMPTY;
                     } else {
                         ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, j));
                         board = drawPiece(board, piece);
                     }
                 }
             }
+            board += RESET_BG_COLOR;
             board += "\n";
         }
         return board;
@@ -42,6 +43,7 @@ public class DrawBoard {
     }
 
     public String drawPiece(String board, ChessPiece piece){
+        board += SET_TEXT_COLOR_WHITE;
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
             switch (piece.getPieceType()) {
                 case KING -> board += WHITE_KING;
@@ -65,28 +67,29 @@ public class DrawBoard {
     }
 
     public String pickBGLetter(String board, int row, int col) {
+        board += SET_TEXT_COLOR_BLACK;
         if (row == 0 || row == 9) {
             switch (col) {
-                case 0, 9 -> board += " ";
-                case 1 -> board += "a";
-                case 2 -> board += "b";
-                case 3 -> board += "c";
-                case 4 -> board += "d";
-                case 5 -> board += "e";
-                case 6 -> board += "f";
-                case 7 -> board += "g";
-                case 8 -> board += "h";
+                case 0, 9 -> board += "   ";
+                case 1 -> board += "a ";
+                case 2 -> board += "b" + BETWEEN;
+                case 3 -> board += "c" + BETWEEN;
+                case 4 -> board += "d" + BETWEEN;
+                case 5 -> board += "e" + BETWEEN;
+                case 6 -> board += "f" + BETWEEN;
+                case 7 -> board += "g" + BETWEEN;
+                case 8 -> board += " h" + BETWEEN;
             }
         } else {
             switch (row) {
-                case 1 -> board += "1";
-                case 2 -> board += "2";
-                case 3 -> board += "3";
-                case 4 -> board += "4";
-                case 5 -> board += "5";
-                case 6 -> board += "6";
-                case 7 -> board += "7";
-                case 8 -> board += "8";
+                case 1 -> board += " 1 ";
+                case 2 -> board += " 2 ";
+                case 3 -> board += " 3 ";
+                case 4 -> board += " 4 ";
+                case 5 -> board += " 5 ";
+                case 6 -> board += " 6 ";
+                case 7 -> board += " 7 ";
+                case 8 -> board += " 8 ";
             }
         }
         return board;
