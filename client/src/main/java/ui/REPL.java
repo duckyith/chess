@@ -135,5 +135,9 @@ public class REPL {
             state = State.SIGNEDOUT;
             loggedInClient.back = false;
         }
+        if (loggedInClient.forward){
+            state = State.INGAME;
+            loggedInClient.forward = false;
+        }
     }
 }
