@@ -4,6 +4,4 @@ import models.GameData;
 
 import java.util.ArrayList;
 
-public class Games {
-    ArrayList<GameData> games;
-}
+public record Games(ArrayList<GameData> games) { }

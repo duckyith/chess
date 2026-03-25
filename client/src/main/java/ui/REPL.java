@@ -74,8 +74,8 @@ public class REPL {
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (cmd) {
             case "logout" -> loggedInClient.logout(authToken, username);
-            case "create" -> "not implemented";
-            case "list" -> "not implemented";
+            case "create" -> loggedInClient.create(params[0], authToken);
+            case "list" -> loggedInClient.list(authToken);
             case "play" -> "not implemented";
             case "observe" -> "not implemented";
             case "quit" -> "quit";

@@ -3,6 +3,7 @@ package ui;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import models.AuthData;
+import models.GameData;
 import models.UserData;
 
 import java.net.*;
@@ -45,8 +46,8 @@ public class ServerFacade {
         }
     }
 
-    public Games list(UserData userData, String authToken) throws ResponseException {
-        var request = buildRequest("GET", "/game", userData, authToken);
+    public Games list(String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
@@ -54,13 +55,13 @@ public class ServerFacade {
         return handleResponse(response, Games.class);
     }
 
-    public int create(UserData userData, String authToken) throws ResponseException {
-        var request = buildRequest("POST", "/game", userData, authToken);
+    public void create(String gameName, String authToken) throws ResponseException {
+        GameData gameData = new GameData(1000,null,null,gameName,null);
+        var request = buildRequest("POST", "/game", gameData, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
         }
-        return handleResponse(response, int.class);
     }
 
     public void join(UserData userData, String authToken) throws ResponseException {
