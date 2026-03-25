@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import exception.ResponseException;
 import models.AuthData;
 import models.GameData;
+import models.JoinData;
 import models.UserData;
 
 import java.net.*;
@@ -64,8 +65,8 @@ public class ServerFacade {
         }
     }
 
-    public void join(UserData userData, String authToken) throws ResponseException {
-        var request = buildRequest("PUT", "/game", userData, authToken);
+    public void play(JoinData joinData, String authToken) throws ResponseException {
+        var request = buildRequest("PUT", "/game", joinData, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());

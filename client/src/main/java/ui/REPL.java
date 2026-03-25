@@ -76,7 +76,7 @@ public class REPL {
             case "logout" -> loggedInClient.logout(authToken, username);
             case "create" -> loggedInClient.create(params[0], authToken);
             case "list" -> loggedInClient.list(authToken);
-            case "play" -> "not implemented";
+            case "play" -> loggedInClient.play(params[0],params[1],authToken);
             case "observe" -> "not implemented";
             case "quit" -> "quit";
             default -> help();
@@ -109,7 +109,7 @@ public class REPL {
                     - logout
                     - create <gameName>
                     - list
-                    - play <gameNumber> <teamColor>
+                    - play <gameNumber> <COLOR>
                     - observe <gameNumber>
                     - quit
                     """;
