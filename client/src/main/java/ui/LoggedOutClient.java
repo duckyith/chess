@@ -8,7 +8,7 @@ public class LoggedOutClient {
     private final ServerFacade server;
     public String username;
     public String authToken;
-    public boolean success = false;
+    public boolean forward = false;
 
     public LoggedOutClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -20,11 +20,11 @@ public class LoggedOutClient {
             if (authData != null && authData.authToken() != null) {
                 username = authData.username();
                 authToken = authData.authToken();
-                success = true;
+                forward = true;
                 return String.format("User registered. You signed in as %s.", params[0]);
             }
         }
-        return "fail";
+        return "missing a field";
     }
 
     public String login(String... params) throws ResponseException {
@@ -33,9 +33,10 @@ public class LoggedOutClient {
             if (authData != null && authData.authToken() != null) {
                 username = authData.username();
                 authToken = authData.authToken();
+                forward = true;
                 return String.format("You signed in as %s.", params[0]);
             }
         }
-        return "fail";
+        return "missing a field";
     }
 }

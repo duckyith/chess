@@ -3,16 +3,13 @@ package ui;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import models.AuthData;
-import models.GameData;
 import models.UserData;
 
-import java.lang.reflect.Array;
 import java.net.*;
 import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.ArrayList;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -23,7 +20,7 @@ public class ServerFacade {
     }
 
     public AuthData register(UserData userData) throws ResponseException {
-        var request = buildRequest("POST", "/user", userData);
+        var request = buildRequest("POST", "/user", userData, null);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
@@ -32,7 +29,7 @@ public class ServerFacade {
     }
 
     public AuthData login(UserData userData) throws ResponseException {
-        var request = buildRequest("POST", "/session", userData);
+        var request = buildRequest("POST", "/session", userData, null);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
@@ -40,16 +37,16 @@ public class ServerFacade {
         return handleResponse(response, AuthData.class);
     }
 
-    public void logout(UserData userData) throws ResponseException {
-        var request = buildRequest("DELETE", "/session", userData);
+    public void logout(String authToken) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", null, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
         }
     }
 
-    public Games list(UserData userData) throws ResponseException {
-        var request = buildRequest("GET", "/game", userData);
+    public Games list(UserData userData, String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", userData, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
@@ -57,8 +54,8 @@ public class ServerFacade {
         return handleResponse(response, Games.class);
     }
 
-    public int create(UserData userData) throws ResponseException {
-        var request = buildRequest("POST", "/game", userData);
+    public int create(UserData userData, String authToken) throws ResponseException {
+        var request = buildRequest("POST", "/game", userData, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
@@ -66,28 +63,23 @@ public class ServerFacade {
         return handleResponse(response, int.class);
     }
 
-    public void join(UserData userData) throws ResponseException {
-        var request = buildRequest("PUT", "/game", userData);
+    public void join(UserData userData, String authToken) throws ResponseException {
+        var request = buildRequest("PUT", "/game", userData, authToken);
         var response = sendRequest(request);
         if (response.statusCode() != 200) {
             throw new ResponseException(ResponseException.Code.ClientError, response.body());
         }
     }
 
-    public void clear(UserData userData) throws ResponseException {
-        var request = buildRequest("DELETE", "/db", userData);
-        var response = sendRequest(request);
-        if (response.statusCode() != 200) {
-            throw new ResponseException(ResponseException.Code.ClientError, response.body());
-        }
-    }
-
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest buildRequest(String method, String path, Object body, String authToken) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        if (authToken != null) {
+            request.setHeader("Authorization", authToken);
         }
         return request.build();
     }

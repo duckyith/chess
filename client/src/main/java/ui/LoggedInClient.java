@@ -8,34 +8,18 @@ public class LoggedInClient {
     private final ServerFacade server;
     public String username;
     public String authToken;
-    public boolean success = false;
+    public boolean forward = false;
+    public boolean back = false;
 
     public LoggedInClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
     }
 
-    public String register(String... params) throws ResponseException {
-        if (params.length == 3) {
-            AuthData authData = server.register(new UserData(params[0], params[1], params[2]));
-            if (authData != null && authData.authToken() != null) {
-                username = authData.username();
-                authToken = authData.authToken();
-                success = true;
-                return String.format("User registered. You signed in as %s.", params[0]);
-            }
-        }
-        return "fail";
-    }
-
-    public String login(String... params) throws ResponseException {
-        if (params.length == 2) {
-            AuthData authData = server.login(new UserData(params[0], params[1], null));
-            if (authData != null && authData.authToken() != null) {
-                username = authData.username();
-                authToken = authData.authToken();
-                return String.format("You signed in as %s.", params[0]);
-            }
-        }
-        return "fail";
+    public String logout(String authToken, String username) throws ResponseException {
+            server.logout(authToken);
+            this.username = null;
+            this.authToken = null;
+            back = true;
+            return String.format("You signed out as %s.", username);
     }
 }

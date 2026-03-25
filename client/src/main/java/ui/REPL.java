@@ -1,7 +1,6 @@
 package ui;
 
 import exception.ResponseException;
-import models.UserData;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -14,10 +13,11 @@ public class REPL {
     public State state = State.SIGNEDOUT;
     public State nextState;
     LoggedOutClient loggedOutClient;
+    LoggedInClient loggedInClient;
 
     public REPL(String serverUrl) {
-        ServerFacade server = new ServerFacade(serverUrl);
         loggedOutClient = new LoggedOutClient(serverUrl);
+        loggedInClient = new LoggedInClient(serverUrl);
     }
 
     public void run() {
@@ -45,7 +45,15 @@ public class REPL {
     }
 
     private void printPrompt() {
-        System.out.print(SET_TEXT_COLOR_WHITE + "\n" + ">>> ");
+        System.out.print(SET_TEXT_COLOR_WHITE + "\n");
+        String printState = "";
+        switch (state) {
+            case State.SIGNEDOUT -> printState = "[LOGGED_OUT]";
+            case State.SIGNEDIN -> printState = "[LOGGED_IN]";
+            case State.INGAME -> printState = "[IN_GAME]";
+        }
+        System.out.print(printState);
+        System.out.print(">>>");
     }
 
     public String evalLoggedOut(String input) throws ResponseException {
@@ -65,7 +73,7 @@ public class REPL {
         String cmd = (tokens.length > 0) ? tokens[0] : "help";
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (cmd) {
-            case "logout" -> "not implemented";
+            case "logout" -> loggedInClient.logout(authToken, username);
             case "create" -> "not implemented";
             case "list" -> "not implemented";
             case "play" -> "not implemented";
@@ -98,8 +106,11 @@ public class REPL {
         }
         if (state == State.SIGNEDIN) {
             return """
-                    - register <username> <password> <email@email.com>
-                    - login <username> <password>
+                    - logout
+                    - create <gameName>
+                    - list
+                    - play <gameNumber> <teamColor>
+                    - observe <gameNumber>
                     - quit
                     """;
         }
@@ -112,11 +123,17 @@ public class REPL {
     }
 
     public void updateState() {
-        if (loggedOutClient.success){
+        if (loggedOutClient.forward){
             username = loggedOutClient.username;
             authToken = loggedOutClient.authToken;
             state = State.SIGNEDIN;
-            loggedOutClient.success = false;
+            loggedOutClient.forward = false;
+        }
+        if (loggedInClient.back){
+            username = null;
+            authToken = null;
+            state = State.SIGNEDOUT;
+            loggedInClient.back = false;
         }
     }
 }
