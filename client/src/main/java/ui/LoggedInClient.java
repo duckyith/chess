@@ -58,18 +58,13 @@ public class LoggedInClient {
         if (Objects.equals(color, "white")) {
             capsColor = "WHITE";
         } else {capsColor = "BLACK";}
-        int gameID = activeGames.get(Integer.parseInt(gameNumber)-1).gameID();
+        GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
+        int gameID = game.gameID();
         JoinData joinData = new JoinData(capsColor, Integer.toString(gameID));
         server.play(joinData, authToken);
         forward = true;
-        return draw(gameNumber,capsColor);
-    }
-
-    public String draw(String gameNumber, String color) {
-        ChessGame game = activeGames.get(Integer.parseInt(gameNumber)-1).game();
-        if (Objects.equals(color, "WHITE")) {
-            return "white side";
-        }
-        return "black side";
+        if (Objects.equals(color, "white")) {
+            return new DrawBoard(game.game()).drawWhite();
+        } else {return new DrawBoard(game.game()).drawBlack();}
     }
 }
