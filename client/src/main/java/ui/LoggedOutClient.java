@@ -16,7 +16,12 @@ public class LoggedOutClient {
 
     public String register(String... params) throws ResponseException {
         if (params.length == 3) {
-            AuthData authData = server.register(new UserData(params[0], params[1], params[2]));
+            AuthData authData;
+            try {
+                authData = server.register(new UserData(params[0], params[1], params[2]));
+            } catch (ResponseException ex) {
+                return "already taken";
+            }
             if (authData != null && authData.authToken() != null) {
                 username = authData.username();
                 authToken = authData.authToken();
@@ -24,12 +29,17 @@ public class LoggedOutClient {
                 return String.format("User registered. You signed in as %s.", params[0]);
             }
         }
-        return "missing a field";
+        return "missing or too many fields. username password email";
     }
 
     public String login(String... params) throws ResponseException {
         if (params.length == 2) {
-            AuthData authData = server.login(new UserData(params[0], params[1], null));
+            AuthData authData;
+            try {
+                authData = server.login(new UserData(params[0], params[1], null));
+            } catch (ResponseException ex){
+                return "unauthorized";
+            }
             if (authData != null && authData.authToken() != null) {
                 username = authData.username();
                 authToken = authData.authToken();
@@ -37,6 +47,6 @@ public class LoggedOutClient {
                 return String.format("You signed in as %s.", params[0]);
             }
         }
-        return "missing a field";
+        return "missing or too many fields. username password";
     }
 }

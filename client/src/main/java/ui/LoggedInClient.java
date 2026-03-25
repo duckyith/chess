@@ -51,6 +51,15 @@ public class LoggedInClient {
     }
 
     public String play(String gameNumber, String color, String authToken) throws ResponseException {
+        int index;
+        try {
+            index = Integer.parseInt(gameNumber);
+        } catch (NumberFormatException ex){
+            return "please enter a game number from the list";
+        }
+        if (!(index >= 0 && index < activeGames.size()+1)) {
+            return "out of range, use command list to see options";
+        }
         if (!Objects.equals(color, "black") && !Objects.equals(color, "white")) {
             return "color invalid, options: black or white";
         }
@@ -61,7 +70,11 @@ public class LoggedInClient {
         GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
         int gameID = game.gameID();
         JoinData joinData = new JoinData(capsColor, Integer.toString(gameID));
-        server.play(joinData, authToken);
+        try {
+            server.play(joinData, authToken);
+        } catch (ResponseException ex) {
+            return "already taken";
+        }
         forward = true;
         if (Objects.equals(color, "white")) {
             return new DrawBoard(game.game()).drawWhite();

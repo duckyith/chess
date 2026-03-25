@@ -168,7 +168,7 @@ public class CustomServiceTests {
     }
 
     @Test
-    @DisplayName("Clear S") //I don't know if I can write a negative test for clear
+    @DisplayName("Clear S2") //I don't know if I can write a negative test for clear
     public void clearSuccess2() throws BadRequestException, DataAccessException, AlreadyTakenException, SQLException {
         UserData userData = new UserData("username","password","username@gmail.com");
         service.register(userData);
