@@ -57,7 +57,7 @@ public class LoggedInClient {
         } catch (NumberFormatException ex){
             return "please enter a game number from the list";
         }
-        if (!(index >= 0 && index < activeGames.size()+1)) {
+        if (!(index > 0 && index < activeGames.size()+1)) {
             return "out of range, use command list to see options";
         }
         if (!Objects.equals(color, "black") && !Objects.equals(color, "white")) {
@@ -82,6 +82,15 @@ public class LoggedInClient {
     }
 
     public String observe(String gameNumber) {
+        int index;
+        try {
+            index = Integer.parseInt(gameNumber);
+        } catch (NumberFormatException ex){
+            return "please enter a game number from the list";
+        }
+        if (!(index > 0 && index < activeGames.size()+1)) {
+            return "out of range, use command list to see options";
+        }
         GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
         forward = true;
         return new DrawBoard(game.game()).drawWhite();
