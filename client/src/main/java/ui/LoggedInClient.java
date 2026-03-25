@@ -67,4 +67,10 @@ public class LoggedInClient {
             return new DrawBoard(game.game()).drawWhite();
         } else {return new DrawBoard(game.game()).drawBlack();}
     }
+
+    public String observe(String gameNumber) {
+        GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
+        forward = true;
+        return new DrawBoard(game.game()).drawWhite();
+    }
 }

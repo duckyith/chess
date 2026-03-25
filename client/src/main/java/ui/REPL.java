@@ -13,10 +13,12 @@ public class REPL {
     public State state = State.SIGNEDOUT;
     LoggedOutClient loggedOutClient;
     LoggedInClient loggedInClient;
+    InGameClient inGameClient;
 
     public REPL(String serverUrl) {
         loggedOutClient = new LoggedOutClient(serverUrl);
         loggedInClient = new LoggedInClient(serverUrl);
+        inGameClient = new InGameClient(serverUrl);
     }
 
     public void run() {
@@ -76,7 +78,7 @@ public class REPL {
             case "create" -> loggedInClient.create(params[0], authToken);
             case "list" -> loggedInClient.list(authToken);
             case "play" -> loggedInClient.play(params[0],params[1],authToken);
-            case "observe" -> "not implemented";
+            case "observe" -> loggedInClient.observe(params[0]);
             case "quit" -> "quit";
             default -> help();
         };
@@ -89,7 +91,7 @@ public class REPL {
         return switch (cmd) {
             case "move" -> "not implemented";
             case "resign" -> "not implemented";
-            case "leave" -> "not implemented";
+            case "leave" -> inGameClient.leave();
             case "quit" -> "quit";
             default -> help();
         };
@@ -137,6 +139,10 @@ public class REPL {
         if (loggedInClient.forward){
             state = State.INGAME;
             loggedInClient.forward = false;
+        }
+        if (inGameClient.back){
+            state = State.SIGNEDIN;
+            inGameClient.back = false;
         }
     }
 }
