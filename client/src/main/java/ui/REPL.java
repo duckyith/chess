@@ -77,7 +77,7 @@ public class REPL {
             case "logout" -> loggedInClient.logout(authToken, username);
             case "create" -> loggedInClient.create(params[0], authToken);
             case "list" -> loggedInClient.list(authToken);
-            case "play" -> loggedInClient.play(params[0],params[1],authToken);
+            case "play" -> loggedInClient.play(authToken,params);
             case "observe" -> loggedInClient.observe(params[0]);
             case "quit" -> "quit";
             default -> help();
@@ -92,6 +92,7 @@ public class REPL {
             case "move" -> "not implemented";
             case "resign" -> "not implemented";
             case "leave" -> inGameClient.leave();
+            case "redraw" -> "not implemented";
             case "quit" -> "quit";
             default -> help();
         };
@@ -118,6 +119,7 @@ public class REPL {
         return """
                 - move <from> <to>
                 - resign
+                - redraw
                 - leave
                 - quit
                 """;

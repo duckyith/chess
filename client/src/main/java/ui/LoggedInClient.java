@@ -50,8 +50,13 @@ public class LoggedInClient {
         return gamesString.toString();
     }
 
-    public String play(String gameNumber, String color, String authToken) throws ResponseException {
+    public String play(String authToken, String... params) throws ResponseException {
         int index;
+        if (params.length != 2){
+            return "missing or too many fields. play # color";
+        }
+        String gameNumber = params[0];
+        String color = params[1];
         try {
             index = Integer.parseInt(gameNumber);
         } catch (NumberFormatException ex){
