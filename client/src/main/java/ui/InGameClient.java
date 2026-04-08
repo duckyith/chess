@@ -5,6 +5,7 @@ import models.AuthData;
 import models.UserData;
 
 public class InGameClient {
+    private final ServerFacade server;
     public boolean back = false;
 
     public InGameClient(String serverUrl) {
