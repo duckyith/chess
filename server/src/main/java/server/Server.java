@@ -8,6 +8,7 @@ import models.AuthData;
 import models.GameData;
 import models.JoinData;
 import models.UserData;
+import server.websocket.WebSocketHandler;
 import service.AlreadyTakenException;
 import service.BadRequestException;
 import service.Service;
@@ -21,11 +22,13 @@ import java.util.Map;
 public class Server {
     private final Service service;
     private final Gson gson = new Gson();
+    private final WebSocketHandler webSocketHandler;
     private final Javalin javalin;
 
     public Server() {
         UserDAO userDAO = new MYSQLUserDAO();
         service = new Service(userDAO);
+        webSocketHandler = new WebSocketHandler();
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
@@ -44,6 +47,11 @@ public class Server {
         javalin.exception(Exception.class, (error, ctx) -> {
             ctx.status(500);
             ctx.result(gson.toJson(Map.of("message", "Internal Server Error: " + error.getMessage())));
+        });
+        javalin.ws("/ws", ws -> {
+            ws.onConnect(webSocketHandler);
+            ws.onMessage(webSocketHandler);
+            ws.onClose(webSocketHandler);
         });
     }
 
