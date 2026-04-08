@@ -28,7 +28,7 @@ public class Server {
     public Server() {
         UserDAO userDAO = new MYSQLUserDAO();
         service = new Service(userDAO);
-        webSocketHandler = new WebSocketHandler();
+        webSocketHandler = new WebSocketHandler(userDAO);
 
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 

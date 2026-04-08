@@ -4,26 +4,35 @@ import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
+    public final ConcurrentHashMap<Integer, Set<Session>> connections = new ConcurrentHashMap<>();
 
-    public void add(Session session) {
-        connections.put(session, session);
+    public void add(Integer gameID, Session session) {
+        connections
+                .computeIfAbsent(gameID, id -> ConcurrentHashMap.newKeySet())
+                .add(session);
     }
 
-    public void remove(Session session) {
-        connections.remove(session);
+    public void remove(Integer gameID, Session session) {
+        Set<Session> sessions = connections.get(gameID);
+        if (sessions != null) {
+            sessions.remove(session);
+            if (sessions.isEmpty()) {
+                connections.remove(gameID);
+            }
+        }
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification) throws IOException {
+    public void broadcast(Integer gameID, Session excludeSession, ServerMessage notification) throws IOException {
+        Set<Session> sessions = connections.get(gameID);
+        if (sessions == null) return;
         String msg = notification.toString();
-        for (Session c : connections.values()) {
-            if (c.isOpen()) {
-                if (!c.equals(excludeSession)) {
-                    c.getRemote().sendString(msg);
-                }
+        for (Session s : sessions) {
+            if (s.isOpen() && !s.equals(excludeSession)) {
+                s.getRemote().sendString(msg);
             }
         }
     }
