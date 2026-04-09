@@ -1,6 +1,8 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.UserDAO;
 import io.javalin.websocket.WsCloseContext;
@@ -44,6 +46,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         Gson gson = new Gson();
         try {
             UserGameCommand command = gson.fromJson(ctx.message(), UserGameCommand.class);
+            ChessMove move = null;
+            if (command.getCommandType() == UserGameCommand.CommandType.MAKE_MOVE) {
+                command = gson.fromJson(ctx.message(), MakeMoveCommand.class);
+                move = ((MakeMoveCommand) command).getMove();
+            }
 
             if (command.getGameID() == null || command.getGameID() < 0) {
                 throw new IllegalArgumentException("Error, invalid game ID: " + command.getGameID());
@@ -69,7 +76,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(gameId, username, session, color, game);
-                case MAKE_MOVE -> makeMove(gameId, game);
+                case MAKE_MOVE -> makeMove(gameId, game, move);
                 case LEAVE -> leaveGame(gameId, username, session);
                 case RESIGN -> resign(gameId, username, session);
             }
@@ -102,11 +109,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(gameID, session);
     }
 
-    public void makeMove(int gameID, ChessGame game) {
+    public void makeMove(int gameID, ChessGame game, ChessMove move) {
         try {
+            game.makeMove(move);
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             connections.broadcast(gameID, null, notification);
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InvalidMoveException e) {
             throw new RuntimeException(e);
         }
     }
