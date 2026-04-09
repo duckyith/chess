@@ -14,8 +14,10 @@ public class LoggedInClient {
     private final ServerFacade server;
     public String username;
     public String authToken;
+    public int gameID;
     public boolean forward = false;
     public boolean back = false;
+    public GameData gameData;
     public ArrayList<GameData> activeGames = new ArrayList<>();
 
     public LoggedInClient(String serverUrl) {
@@ -81,9 +83,12 @@ public class LoggedInClient {
             return "already taken";
         }
         forward = true;
-        if (Objects.equals(color, "white")) {
-            return new DrawBoard(game.game()).drawWhite();
-        } else {return new DrawBoard(game.game()).drawBlack();}
+//        if (Objects.equals(color, "white")) {
+//            return new DrawBoard(game.game()).drawWhite();
+//        } else {return new DrawBoard(game.game()).drawBlack();}
+        this.gameID = gameID;
+        this.gameData = game;
+        return "connecting to game...";
     }
 
     public String observe(String gameNumber) {

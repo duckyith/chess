@@ -1,13 +1,14 @@
 package ui;
 
 import exception.ResponseException;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class REPL {
+public class REPL implements NotificationHandler {
     public String username = null;
     public String authToken = null;
     public State state = State.SIGNEDOUT;
@@ -18,7 +19,7 @@ public class REPL {
     public REPL(String serverUrl) {
         loggedOutClient = new LoggedOutClient(serverUrl);
         loggedInClient = new LoggedInClient(serverUrl);
-        inGameClient = new InGameClient(serverUrl);
+        inGameClient = new InGameClient(serverUrl, this);
     }
 
     public void run() {
@@ -92,7 +93,8 @@ public class REPL {
             case "move" -> "not implemented";
             case "resign" -> "not implemented";
             case "leave" -> inGameClient.leave();
-            case "redraw" -> "not implemented";
+            case "redraw" -> inGameClient.redraw();
+            case "highlight" -> "not implemented";
             case "quit" -> "quit";
             default -> help();
         };
@@ -120,6 +122,7 @@ public class REPL {
                 - move <from> <to>
                 - resign
                 - redraw
+                - highlight <piece>
                 - leave
                 - quit
                 """;
@@ -141,10 +144,16 @@ public class REPL {
         if (loggedInClient.forward){
             state = State.INGAME;
             loggedInClient.forward = false;
+            inGameClient.update(loggedInClient.gameID, loggedInClient.username, loggedInClient.authToken, loggedInClient.gameData);
         }
         if (inGameClient.back){
             state = State.SIGNEDIN;
             inGameClient.back = false;
         }
+    }
+
+    @Override
+    public void notify(ServerMessage message) {
+
     }
 }
