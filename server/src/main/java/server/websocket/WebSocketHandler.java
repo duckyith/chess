@@ -76,9 +76,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(gameId, username, session, color, game);
-                case MAKE_MOVE -> makeMove(gameId, game, move);
+                case MAKE_MOVE -> makeMove(gameId, game, move, username, session);
                 case LEAVE -> leaveGame(gameId, username, session);
-                case RESIGN -> resign(gameId, username, session);
+                case RESIGN -> resign(gameId, username, session, game);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -109,11 +109,25 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(gameID, session);
     }
 
-    public void makeMove(int gameID, ChessGame game, ChessMove move) {
+    public void makeMove(int gameID, ChessGame game, ChessMove move, String username, Session session) {
         try {
             game.makeMove(move);
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             connections.broadcast(gameID, null, notification);
+            var message = String.format("%s made the move %s", username,move.toString());
+            var newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+            connections.broadcast(gameID, session, newNotification);
+            var stateMessage = "";
+            if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
+                if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
+                    stateMessage = String.format("Checkmate, game over");
+                    game.setGameInactive();
+                } else {
+                    stateMessage = String.format("Check");
+                }
+                newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, stateMessage);
+                connections.broadcast(gameID, null, newNotification);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (InvalidMoveException e) {
@@ -121,8 +135,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(int gameID, String visitorName, Session session) throws IOException {
+    private void resign(int gameID, String visitorName, Session session, ChessGame game) throws IOException {
         var message = String.format("%s has resigned, the game has ended", visitorName);
+        game.setGameInactive();
         var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(gameID, session, notification);
         connections.remove(gameID, session);

@@ -18,11 +18,16 @@ public class ChessGame {
     TeamColor teamTurn;
     ChessBoard game;
     ChessMove prevMove;
+    Boolean gameActive = true;
 
     public ChessGame() {
         game = new ChessBoard();
         game.resetBoard();
         teamTurn = TeamColor.WHITE;
+    }
+
+    public void setGameInactive() {
+        gameActive = false;
     }
 
     /**
