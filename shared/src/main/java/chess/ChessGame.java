@@ -30,6 +30,8 @@ public class ChessGame {
         gameActive = false;
     }
 
+    public boolean isActive() {return gameActive;}
+
     /**
      * @return Which team's turn it is
      */

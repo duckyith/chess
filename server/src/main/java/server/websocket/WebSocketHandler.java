@@ -76,9 +76,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
             switch (command.getCommandType()) {
                 case CONNECT -> connect(gameId, username, session, color, game);
-                case MAKE_MOVE -> makeMove(gameId, game, move, username, session);
-                case LEAVE -> leaveGame(gameId, username, session);
-                case RESIGN -> resign(gameId, username, session, game);
+                case MAKE_MOVE -> makeMove(gameId, game, move, username, session, color, gameData);
+                case LEAVE -> leaveGame(gameId, username, session, gameData, color);
+                case RESIGN -> resign(gameId, username, gameData, game, color);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -102,19 +102,43 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcast(gameID, session, notification);
     }
 
-    private void leaveGame(int gameID, String visitorName, Session session) throws IOException {
+    private void leaveGame(int gameID, String visitorName, Session session, GameData gameData, String color) throws IOException {
         var message = String.format("%s left the game, waiting for new player...", visitorName);
         var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        String white = gameData.whiteUsername();
+        String black = gameData.blackUsername();
+        if (Objects.equals(color, "white")) {
+            white = null;
+        }
+        if (Objects.equals(color, "black")) {
+            black = null;
+        }
+        GameData newGameData = new GameData(gameID,white,black,gameData.gameName(),gameData.game());
+        userDAO.updateGame(newGameData);
         connections.broadcast(gameID, session, notification);
         connections.remove(gameID, session);
     }
 
-    public void makeMove(int gameID, ChessGame game, ChessMove move, String username, Session session) {
+    public void makeMove(int gameID, ChessGame game, ChessMove move, String username,
+                         Session session, String color, GameData gameData) {
         try {
+            if (!game.isActive()) {
+                throw new IllegalArgumentException("Error, this game has ended");
+            }
+            if (!Objects.equals(color, "white") && !Objects.equals(color, "black")) {
+                throw new IllegalArgumentException("Error, you are an observer");
+            }
+            ChessGame.TeamColor capsColor = ChessGame.TeamColor.WHITE;
+            if (color.equals("black")) {capsColor = ChessGame.TeamColor.BLACK;}
+            if (!Objects.equals(game.getTeamTurn(), capsColor)) {
+                throw new IllegalArgumentException("Error, not your turn");
+            }
             game.makeMove(move);
+            GameData newGameData = new GameData(gameID,gameData.whiteUsername(),gameData.blackUsername(), gameData.gameName(),game);
+            userDAO.updateGame(newGameData);
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             connections.broadcast(gameID, null, notification);
-            var message = String.format("%s made the move %s", username,move.toString());
+            var message = String.format("%s made the move %s", username,move);
             var newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(gameID, session, newNotification);
             var stateMessage = "";
@@ -135,11 +159,18 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void resign(int gameID, String visitorName, Session session, ChessGame game) throws IOException {
-        var message = String.format("%s has resigned, the game has ended", visitorName);
+    private void resign(int gameID, String username, GameData gameData, ChessGame game, String color) throws IOException {
+        if (!Objects.equals(color, "white") && !Objects.equals(color, "black")) {
+            throw new IllegalArgumentException("Error, you are an observer");
+        }
+        if (!game.isActive()) {
+            throw new IllegalArgumentException("Error, this game has ended");
+        }
+        var message = String.format("%s has resigned, the game has ended", username);
         game.setGameInactive();
+        GameData newGameData = new GameData(gameID,gameData.whiteUsername(),gameData.blackUsername(), gameData.gameName(),game);
+        userDAO.updateGame(newGameData);
         var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(gameID, session, notification);
-        connections.remove(gameID, session);
+        connections.broadcast(gameID, null, notification);
     }
 }
