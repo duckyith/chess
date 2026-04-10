@@ -13,8 +13,7 @@ import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
 import models.GameData;
 import org.eclipse.jetty.websocket.api.Session;
-import server.Server;
-import service.UnauthorizedException;
+import org.jetbrains.annotations.NotNull;
 import websocket.commands.*;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -53,13 +52,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             }
 
             if (command.getGameID() == null || command.getGameID() < 0) {
-                throw new IllegalArgumentException("Error, invalid game ID: " + command.getGameID());
+                throw new IllegalArgumentException("Invalid game ID: " + command.getGameID());
             }
             if (userDAO.getGame(Integer.toString(command.getGameID())) == null) {
-                throw new IllegalArgumentException("Error, game not found: " + command.getGameID());
+                throw new IllegalArgumentException("Game not found: " + command.getGameID());
             }
             if (command.getAuthToken() == null || userDAO.getUserByToken(command.getAuthToken()) == null) {
-                throw new IllegalArgumentException("Error, bad token: " + command.getGameID());
+                throw new IllegalArgumentException("Bad token: " + command.getGameID());
             }
 
             gameId = command.getGameID();
@@ -80,8 +79,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEAVE -> leaveGame(gameId, username, session, gameData, color);
                 case RESIGN -> resign(gameId, username, gameData, game, color);
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (InvalidMoveException e) {
+            ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,"Error: Invalid Move");
+            String message = gson.toJson(errorMessage);
+            session.getRemote().sendString(message);
+        }
+        catch (Exception ex) {
             ErrorMessage errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR,"Error: " + ex.getMessage());
             String message = gson.toJson(errorMessage);
             session.getRemote().sendString(message);
@@ -89,7 +92,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleClose(WsCloseContext ctx) {
+    public void handleClose(@NotNull WsCloseContext ctx) {
         System.out.println("Websocket closed");
     }
 
@@ -120,51 +123,92 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void makeMove(int gameID, ChessGame game, ChessMove move, String username,
-                         Session session, String color, GameData gameData) {
+                         Session session, String color, GameData gameData) throws InvalidMoveException {
         try {
             if (!game.isActive()) {
-                throw new IllegalArgumentException("Error, this game has ended");
+                throw new IllegalArgumentException("This game has ended");
             }
             if (!Objects.equals(color, "white") && !Objects.equals(color, "black")) {
-                throw new IllegalArgumentException("Error, you are an observer");
+                throw new IllegalArgumentException("You are an observer");
             }
             ChessGame.TeamColor capsColor = ChessGame.TeamColor.WHITE;
             if (color.equals("black")) {capsColor = ChessGame.TeamColor.BLACK;}
             if (!Objects.equals(game.getTeamTurn(), capsColor)) {
-                throw new IllegalArgumentException("Error, not your turn");
+                throw new IllegalArgumentException("Not your turn");
             }
             game.makeMove(move);
             GameData newGameData = new GameData(gameID,gameData.whiteUsername(),gameData.blackUsername(), gameData.gameName(),game);
             userDAO.updateGame(newGameData);
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
             connections.broadcast(gameID, null, notification);
-            var message = String.format("%s made the move %s", username,move);
+
+            int from1 = move.getStartPosition().getColumn();
+            int from2 = move.getStartPosition().getRow();
+            String f1 = "";
+            String t1 = "";
+            int to1 = move.getEndPosition().getColumn();
+            int to2 = move.getEndPosition().getRow();
+            switch (from1) {
+                case 1 -> f1 = "a";
+                case 2 -> f1 = "b";
+                case 3 -> f1 = "c";
+                case 4 -> f1 = "d";
+                case 5 -> f1 = "e";
+                case 6 -> f1 = "f";
+                case 7 -> f1 = "g";
+                case 8 -> f1 = "h";
+            }
+            switch (to1) {
+                case 1 -> t1 = "a";
+                case 2 -> t1 = "b";
+                case 3 -> t1 = "c";
+                case 4 -> t1 = "d";
+                case 5 -> t1 = "e";
+                case 6 -> t1 = "f";
+                case 7 -> t1 = "g";
+                case 8 -> t1 = "h";
+            }
+            var message = String.format("%s made the move %s%d %s%d", username,f1,from2,t1,to2);
             var newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
             connections.broadcast(gameID, session, newNotification);
+
             var stateMessage = "";
-            if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
-                if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)) {
-                    stateMessage = String.format("Checkmate, game over");
-                    game.setGameInactive();
-                } else {
-                    stateMessage = String.format("Check");
-                }
-                newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, stateMessage);
-                connections.broadcast(gameID, null, newNotification);
+            if (game.isInCheck(ChessGame.TeamColor.WHITE)) {
+                stateMessage = String.format("%s is in check",newGameData.whiteUsername());
             }
+            if (game.isInCheck(ChessGame.TeamColor.BLACK)){
+                stateMessage = String.format("%s is in check",newGameData.blackUsername());
+            }
+            if (game.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+                stateMessage = String.format("%s is in checkmate, game over",newGameData.whiteUsername());
+                game.setGameInactive();
+            }
+            if (game.isInCheckmate(ChessGame.TeamColor.BLACK)){
+                stateMessage = String.format("%s is in checkmate, game over",newGameData.blackUsername());
+                game.setGameInactive();
+            }
+            if (game.isInStalemate(ChessGame.TeamColor.WHITE)) {
+                stateMessage = String.format("%s is in stalemate, game over",newGameData.whiteUsername());
+                game.setGameInactive();
+            }
+            if (game.isInStalemate(ChessGame.TeamColor.BLACK)){
+                stateMessage = String.format("%s is in stalemate, game over",newGameData.blackUsername());
+                game.setGameInactive();
+            }
+
+            newNotification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, stateMessage);
+            connections.broadcast(gameID, null, newNotification);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (InvalidMoveException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void resign(int gameID, String username, GameData gameData, ChessGame game, String color) throws IOException {
         if (!Objects.equals(color, "white") && !Objects.equals(color, "black")) {
-            throw new IllegalArgumentException("Error, you are an observer");
+            throw new IllegalArgumentException("You are an observer");
         }
         if (!game.isActive()) {
-            throw new IllegalArgumentException("Error, this game has ended");
+            throw new IllegalArgumentException("This game has ended");
         }
         var message = String.format("%s has resigned, the game has ended", username);
         game.setGameInactive();

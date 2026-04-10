@@ -21,6 +21,7 @@ public class REPL implements NotificationHandler {
     LoggedOutClient loggedOutClient;
     LoggedInClient loggedInClient;
     InGameClient inGameClient;
+    Scanner scanner = new Scanner(System.in);
 
     public REPL(String serverUrl) {
         loggedOutClient = new LoggedOutClient(serverUrl);
@@ -32,7 +33,6 @@ public class REPL implements NotificationHandler {
         System.out.println(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + "Welcome to chess! Sign in to start.");
         System.out.print(RESET_TEXT_BOLD_FAINT + SET_TEXT_COLOR_BLUE + help());
 
-        Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
             printPrompt();
@@ -61,7 +61,7 @@ public class REPL implements NotificationHandler {
             case State.INGAME -> printState = "[IN_GAME]";
         }
         System.out.print(printState);
-        System.out.print(">>>");
+        System.out.print(">>> ");
     }
 
     public String evalLoggedOut(String input) throws ResponseException {
@@ -80,6 +80,9 @@ public class REPL implements NotificationHandler {
         String[] tokens = input.toLowerCase().split(" ");
         String cmd = (tokens.length > 0) ? tokens[0] : "help";
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        if ((cmd.equals("create") || cmd.equals("observe")) && params.length != 1) {
+            return "incorrect usage, try help";
+        }
         return switch (cmd) {
             case "logout" -> loggedInClient.logout(authToken, username);
             case "create" -> loggedInClient.create(params[0], authToken);
@@ -91,21 +94,37 @@ public class REPL implements NotificationHandler {
         };
     }
 
-    public String evalInGame(String input) throws ResponseException {
+    public String evalInGame(String input) throws Exception {
         String[] tokens = input.toLowerCase().split(" ");
         String cmd = (tokens.length > 0) ? tokens[0] : "help";
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
         String promo = null;
         if (params.length == 3) {promo = params[2];}
+        if (cmd.equals("move") && params.length < 2) {
+            return "incorrect usage, try help";
+        }
+        if (cmd.equals("highlight") && params.length != 1) {
+            return "incorrect usage, try help";
+        }
         return switch (cmd) {
             case "move" -> inGameClient.move(params[0],params[1],promo);
-            case "resign" -> inGameClient.resign();
+            case "resign" -> resignCheck();
             case "leave" -> inGameClient.leave();
             case "redraw" -> inGameClient.redraw();
             case "highlight" -> inGameClient.highlight(params[0]);
             case "quit" -> "quit";
             default -> help();
         };
+    }
+
+    public String resignCheck () throws ResponseException {
+        System.out.println(SET_TEXT_COLOR_BLUE + "Are you sure? (y/n)");
+        String input = scanner.nextLine();
+        if (input.equalsIgnoreCase("y")) {
+            return inGameClient.resign();
+        } else {
+            return "Resign cancelled";
+        }
     }
 
     public String help() {
@@ -166,28 +185,22 @@ public class REPL implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage message) {
-        System.out.print("\n" + SET_TEXT_COLOR_MAGENTA + RESET_BG_COLOR);
+        System.out.print("\n" + SET_TEXT_COLOR_BLUE + RESET_BG_COLOR);
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
             ChessGame game = ((LoadGameMessage) message).game;
             if (Objects.equals(inGameClient.color, "black")) {
                 System.out.print(new DrawBoard(game).drawBlack());
-                System.out.print("\n");
-                printPrompt();
             } else {
                 System.out.print(new DrawBoard(game).drawWhite());
-                System.out.print("\n");
-                printPrompt();
             }
+            inGameClient.game = game;
         }
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
             System.out.print(((NotificationMessage) message).getMessage());
-            System.out.print("\n");
-            printPrompt();
         }
         if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
             System.out.print(((ErrorMessage) message).getMessage());
-            System.out.print("\n");
-            printPrompt();
         }
+        System.out.print(SET_TEXT_COLOR_WHITE + "\n" + "[IN_GAME]" + ">>> ");
     }
 }
