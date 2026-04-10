@@ -1,9 +1,15 @@
 package ui;
 
+import chess.ChessGame;
+import client.websocket.NotificationHandler;
 import exception.ResponseException;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
@@ -18,7 +24,7 @@ public class REPL implements NotificationHandler {
 
     public REPL(String serverUrl) {
         loggedOutClient = new LoggedOutClient(serverUrl);
-        loggedInClient = new LoggedInClient(serverUrl);
+        loggedInClient = new LoggedInClient(serverUrl, this);
         inGameClient = new InGameClient(serverUrl, this);
     }
 
@@ -79,7 +85,7 @@ public class REPL implements NotificationHandler {
             case "create" -> loggedInClient.create(params[0], authToken);
             case "list" -> loggedInClient.list(authToken);
             case "play" -> loggedInClient.play(authToken,params);
-            case "observe" -> loggedInClient.observe(params[0]);
+            case "observe" -> loggedInClient.observe(params[0],authToken);
             case "quit" -> "quit";
             default -> help();
         };
@@ -89,8 +95,10 @@ public class REPL implements NotificationHandler {
         String[] tokens = input.toLowerCase().split(" ");
         String cmd = (tokens.length > 0) ? tokens[0] : "help";
         String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+        String promo = null;
+        if (params.length == 3) {promo = params[2];}
         return switch (cmd) {
-            case "move" -> "not implemented";
+            case "move" -> inGameClient.move(params[0],params[1],promo);
             case "resign" -> "not implemented";
             case "leave" -> inGameClient.leave();
             case "redraw" -> inGameClient.redraw();
@@ -119,7 +127,7 @@ public class REPL implements NotificationHandler {
                     """;
         }
         return """
-                - move <from> <to>
+                - move <from> <to> <promo> (letter then number)
                 - resign
                 - redraw
                 - highlight <piece>
@@ -144,7 +152,11 @@ public class REPL implements NotificationHandler {
         if (loggedInClient.forward){
             state = State.INGAME;
             loggedInClient.forward = false;
-            inGameClient.update(loggedInClient.gameID, loggedInClient.username, loggedInClient.authToken, loggedInClient.gameData);
+            inGameClient.update(loggedInClient.gameID,
+                    loggedInClient.username,
+                    loggedInClient.authToken,
+                    loggedInClient.gameData,
+                    loggedInClient.color);
         }
         if (inGameClient.back){
             state = State.SIGNEDIN;
@@ -154,6 +166,28 @@ public class REPL implements NotificationHandler {
 
     @Override
     public void notify(ServerMessage message) {
-
+        System.out.print("\n" + SET_TEXT_COLOR_MAGENTA + RESET_BG_COLOR);
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.LOAD_GAME) {
+            ChessGame game = ((LoadGameMessage) message).game;
+            if (Objects.equals(inGameClient.color, "black")) {
+                System.out.print(new DrawBoard(game).drawBlack());
+                System.out.print("\n");
+                printPrompt();
+            } else {
+                System.out.print(new DrawBoard(game).drawWhite());
+                System.out.print("\n");
+                printPrompt();
+            }
+        }
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.NOTIFICATION) {
+            System.out.print(((NotificationMessage) message).getMessage());
+            System.out.print("\n");
+            printPrompt();
+        }
+        if (message.getServerMessageType() == ServerMessage.ServerMessageType.ERROR) {
+            System.out.print(((ErrorMessage) message).getMessage());
+            System.out.print("\n");
+            printPrompt();
+        }
     }
 }

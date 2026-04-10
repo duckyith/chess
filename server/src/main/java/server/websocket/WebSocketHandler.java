@@ -103,7 +103,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void leaveGame(int gameID, String visitorName, Session session, GameData gameData, String color) throws IOException {
-        var message = String.format("%s left the game, waiting for new player...", visitorName);
+        var message = String.format("%s left the game", visitorName);
         var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         String white = gameData.whiteUsername();
         String black = gameData.blackUsername();

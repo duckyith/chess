@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import client.websocket.NotificationHandler;
 import exception.ResponseException;
 import models.AuthData;
 import models.GameData;
@@ -17,10 +18,11 @@ public class LoggedInClient {
     public int gameID;
     public boolean forward = false;
     public boolean back = false;
+    public String color;
     public GameData gameData;
     public ArrayList<GameData> activeGames = new ArrayList<>();
 
-    public LoggedInClient(String serverUrl) {
+    public LoggedInClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
     }
 
@@ -88,10 +90,12 @@ public class LoggedInClient {
 //        } else {return new DrawBoard(game.game()).drawBlack();}
         this.gameID = gameID;
         this.gameData = game;
+        this.authToken = authToken;
+        this.color = color;
         return "connecting to game...";
     }
 
-    public String observe(String gameNumber) {
+    public String observe(String gameNumber,String authToken) {
         int index;
         try {
             index = Integer.parseInt(gameNumber);
@@ -103,6 +107,11 @@ public class LoggedInClient {
         }
         GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
         forward = true;
-        return new DrawBoard(game.game()).drawWhite();
+        //return new DrawBoard(game.game()).drawWhite();
+        this.gameID = game.gameID();
+        this.gameData = game;
+        this.authToken = authToken;
+        this.color = "an observer";
+        return "connecting to game...";
     }
 }
