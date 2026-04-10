@@ -85,9 +85,6 @@ public class LoggedInClient {
             return "already taken";
         }
         forward = true;
-//        if (Objects.equals(color, "white")) {
-//            return new DrawBoard(game.game()).drawWhite();
-//        } else {return new DrawBoard(game.game()).drawBlack();}
         this.gameID = gameID;
         this.gameData = game;
         this.authToken = authToken;
@@ -107,7 +104,6 @@ public class LoggedInClient {
         }
         GameData game = activeGames.get(Integer.parseInt(gameNumber)-1);
         forward = true;
-        //return new DrawBoard(game.game()).drawWhite();
         this.gameID = game.gameID();
         this.gameData = game;
         this.authToken = authToken;

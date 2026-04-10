@@ -49,10 +49,10 @@ public class HighlightDrawBoard {
                 } else {
                     if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)){
                         board.append(SET_BG_COLOR_LIGHT_BROWN);
-                        checkSpecialLight(board,i,j);
+                        checkSpecial(board,i,j,false);
                     } else {
                         board.append(SET_BG_COLOR_DARK_BROWN);
-                        checkSpecialDark(board,i,j);
+                        checkSpecial(board,i,j,true);
                     }
                     if (game.getBoard().getPiece(new ChessPosition(i, 9-j)) == null) {
                         board.append(EMPTY);
@@ -68,18 +68,11 @@ public class HighlightDrawBoard {
         return board.toString();
     }
 
-    public void checkSpecialLight(StringBuilder board, int row, int col){
+    public void checkSpecial(StringBuilder board, int row, int col, boolean dark){
         if (whiteMap.containsKey(row) && whiteMap.get(row).contains(col)){
-            board.append(SET_BG_COLOR_GREEN);
-        }
-        if (row == piece.getRow() && col == 9-piece.getColumn()){
-            board.append(SET_BG_COLOR_RED);
-        }
-    }
-
-    public void checkSpecialDark(StringBuilder board, int row, int col){
-        if (whiteMap.containsKey(row) && whiteMap.get(row).contains(col)){
-            board.append(SET_BG_COLOR_DARK_GREEN);
+            if (!dark) {
+                board.append(SET_BG_COLOR_GREEN);
+            } else { board.append(SET_BG_COLOR_DARK_GREEN);}
         }
         if (row == piece.getRow() && col == 9-piece.getColumn()){
             board.append(SET_BG_COLOR_RED);
@@ -96,10 +89,10 @@ public class HighlightDrawBoard {
                 } else {
                     if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)){
                         board.append(SET_BG_COLOR_LIGHT_BROWN);
-                        checkSpecialLightB(board,i,j);
+                        checkSpecialB(board,i,j,false);
                     } else {
                         board.append(SET_BG_COLOR_DARK_BROWN);
-                        checkSpecialDarkB(board,i,j);}
+                        checkSpecialB(board,i,j,true);}
                     if (game.getBoard().getPiece(new ChessPosition(9-i, j)) == null) {
                         board.append(EMPTY);
                     } else {
@@ -114,18 +107,11 @@ public class HighlightDrawBoard {
         return board.toString();
     }
 
-    public void checkSpecialLightB(StringBuilder board, int row, int col){
+    public void checkSpecialB(StringBuilder board, int row, int col, boolean dark){
         if (blackMap.containsKey(row) && blackMap.get(row).contains(col)){
-            board.append(SET_BG_COLOR_GREEN);
-        }
-        if (row == 9-piece.getRow() && col == piece.getColumn()){
-            board.append(SET_BG_COLOR_RED);
-        }
-    }
-
-    public void checkSpecialDarkB(StringBuilder board, int row, int col){
-        if (blackMap.containsKey(row) && blackMap.get(row).contains(col)){
-            board.append(SET_BG_COLOR_DARK_GREEN);
+            if (!dark) {
+                board.append(SET_BG_COLOR_GREEN);
+            } else { board.append(SET_BG_COLOR_DARK_GREEN);}
         }
         if (row == 9-piece.getRow() && col == piece.getColumn()){
             board.append(SET_BG_COLOR_RED);
