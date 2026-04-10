@@ -57,6 +57,27 @@ public class InGameClient {
         return new DrawBoard(gameData.game()).drawWhite();
     }
 
+    public String highlight(String space) {
+        String letter = space.substring(0,1);
+        int row = Integer.parseInt(space.substring(1,2));
+        int column = 0;
+        switch(letter){
+            case "a" -> column = 1;
+            case "b" -> column = 2;
+            case "c" -> column = 3;
+            case "d" -> column = 4;
+            case "e" -> column = 5;
+            case "f" -> column = 6;
+            case "g" -> column = 7;
+            case "h" -> column = 8;
+        }
+        chess.ChessPosition piece = new ChessPosition(row,column);
+        if (Objects.equals(color, "black")) {
+            return new HighlightDrawBoard(gameData.game(),piece).drawBlack();
+        }
+        return new HighlightDrawBoard(gameData.game(),piece).drawWhite();
+    }
+
     public String resign() throws ResponseException {
         webSocketFacade.resign(authToken,gameID);
         return "you resigned the game";

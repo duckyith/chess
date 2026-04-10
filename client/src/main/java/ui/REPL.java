@@ -102,7 +102,7 @@ public class REPL implements NotificationHandler {
             case "resign" -> inGameClient.resign();
             case "leave" -> inGameClient.leave();
             case "redraw" -> inGameClient.redraw();
-            case "highlight" -> "not implemented";
+            case "highlight" -> inGameClient.highlight(params[0]);
             case "quit" -> "quit";
             default -> help();
         };
