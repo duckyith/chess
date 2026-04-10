@@ -16,179 +16,199 @@ public class HighlightDrawBoard {
     ChessGame game;
     ChessPosition piece;
     ArrayList<ChessMove> highlighted = new ArrayList<>();
-    Map<Integer, List<Integer>> map = new HashMap<>();
+    Map<Integer, List<Integer>> whiteMap = new HashMap<>();
+    Map<Integer, List<Integer>> blackMap = new HashMap<>();
 
     public HighlightDrawBoard(ChessGame game, ChessPosition piece) {
         this.piece = piece;
         this.game = game;
-        map.computeIfAbsent(piece.getRow(), k -> new ArrayList<>()).add(piece.getColumn());
         highlighted.addAll(game.validMoves(piece));
+        whiteMap.computeIfAbsent(piece.getRow(), k -> new ArrayList<>()).add(9-piece.getColumn());
         int row;
         int col;
         for (int i = 0; i < highlighted.size(); i++) {
-            row = highlighted.get(i).getEndPosition().getRow();
+            row = highlighted.get(i).getEndPosition().getRow(); //correct
+            col = 9 - highlighted.get(i).getEndPosition().getColumn(); //correct
+            whiteMap.computeIfAbsent(row, k -> new ArrayList<>()).add(col);
+        }
+        blackMap.computeIfAbsent(9-piece.getRow(), k -> new ArrayList<>()).add(piece.getColumn());
+        for (int i = 0; i < highlighted.size(); i++) {
+            row = 9-highlighted.get(i).getEndPosition().getRow();
             col = highlighted.get(i).getEndPosition().getColumn();
-            map.computeIfAbsent(row, k -> new ArrayList<>()).add(col);
+            blackMap.computeIfAbsent(row, k -> new ArrayList<>()).add(col);
         }
     }
 
     public String drawWhite() {
-        String board = "";
+        StringBuilder board = new StringBuilder();
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j --) {
                 if (i < 1 || j < 1 || i > 8 || j > 8) {
-                    board += SET_BG_COLOR_WHITE;
-                    board = pickBGWhite(board, i, j);
+                    board.append(SET_BG_COLOR_WHITE);
+                    pickBGWhite(board, i, j);
                 } else {
                     if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)){
-                        board += SET_BG_COLOR_LIGHT_BROWN;
-                        board += checkSpecialLight(board,i,j);
+                        board.append(SET_BG_COLOR_LIGHT_BROWN);
+                        checkSpecialLight(board,i,j);
                     } else {
-                        board += SET_BG_COLOR_DARK_BROWN;
-                        board += checkSpecialDark(board,i,j);
+                        board.append(SET_BG_COLOR_DARK_BROWN);
+                        checkSpecialDark(board,i,j);
                     }
                     if (game.getBoard().getPiece(new ChessPosition(i, 9-j)) == null) {
-                        board += EMPTY;
+                        board.append(EMPTY);
                     } else {
                         ChessPiece piece = game.getBoard().getPiece(new ChessPosition(i, 9-j));
-                        board = drawPiece(board, piece);
+                        drawPiece(board, piece);
                     }
                 }
             }
-            board += RESET_BG_COLOR;
-            board += "\n";
+            board.append(RESET_BG_COLOR);
+            board.append("\n");
         }
-        return board;
+        return board.toString();
     }
 
-    public String checkSpecialLight(String board, int row, int col){
-        if (map.containsKey(row) && map.get(row).contains(col)){
-            return board + SET_BG_COLOR_GREEN;
+    public void checkSpecialLight(StringBuilder board, int row, int col){
+        if (whiteMap.containsKey(row) && whiteMap.get(row).contains(col)){
+            board.append(SET_BG_COLOR_GREEN);
         }
-        if (row == piece.getRow() && col == piece.getColumn()){
-            return board + SET_BG_COLOR_RED;
+        if (row == piece.getRow() && col == 9-piece.getColumn()){
+            board.append(SET_BG_COLOR_RED);
         }
-        return board;
     }
 
-    public String checkSpecialDark(String board, int row, int col){
-        if (map.containsKey(row) && map.get(row).contains(col)){
-            return board + SET_BG_COLOR_DARK_GREEN;
+    public void checkSpecialDark(StringBuilder board, int row, int col){
+        if (whiteMap.containsKey(row) && whiteMap.get(row).contains(col)){
+            board.append(SET_BG_COLOR_DARK_GREEN);
         }
-        if (row == piece.getRow() && col == piece.getColumn()){
-            return board + SET_BG_COLOR_RED;
+        if (row == piece.getRow() && col == 9-piece.getColumn()){
+            board.append(SET_BG_COLOR_RED);
         }
-        return board;
     }
 
     public String drawBlack() {
-        String board = "";
+        StringBuilder board = new StringBuilder();
         for (int i = 9; i >= 0; i--) {
             for (int j = 9; j >= 0; j --) {
                 if (i < 1 || j < 1 || i > 8 || j > 8) {
-                    board += SET_BG_COLOR_WHITE;
-                    board = pickBGBlack(board, i, j);
+                    board.append(SET_BG_COLOR_WHITE);
+                    pickBGBlack(board, i, j);
                 } else {
                     if ((i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0)){
-                        board += SET_BG_COLOR_LIGHT_BROWN;
-                        board += checkSpecialLight(board,i,j);
+                        board.append(SET_BG_COLOR_LIGHT_BROWN);
+                        checkSpecialLightB(board,i,j);
                     } else {
-                        board += SET_BG_COLOR_DARK_BROWN;
-                        board += checkSpecialDark(board,i,j);}
+                        board.append(SET_BG_COLOR_DARK_BROWN);
+                        checkSpecialDarkB(board,i,j);}
                     if (game.getBoard().getPiece(new ChessPosition(9-i, j)) == null) {
-                        board += "   "; //EMPTY
+                        board.append(EMPTY);
                     } else {
                         ChessPiece piece = game.getBoard().getPiece(new ChessPosition(9-i, j));
-                        board = drawPiece(board, piece);
+                        drawPiece(board, piece);
                     }
                 }
             }
-            board += RESET_BG_COLOR;
-            board += "\n";
+            board.append(RESET_BG_COLOR);
+            board.append("\n");
         }
-        return board;
+        return board.toString();
     }
 
-    public String drawPiece(String board, ChessPiece piece){
+    public void checkSpecialLightB(StringBuilder board, int row, int col){
+        if (blackMap.containsKey(row) && blackMap.get(row).contains(col)){
+            board.append(SET_BG_COLOR_GREEN);
+        }
+        if (row == 9-piece.getRow() && col == piece.getColumn()){
+            board.append(SET_BG_COLOR_RED);
+        }
+    }
+
+    public void checkSpecialDarkB(StringBuilder board, int row, int col){
+        if (blackMap.containsKey(row) && blackMap.get(row).contains(col)){
+            board.append(SET_BG_COLOR_DARK_GREEN);
+        }
+        if (row == 9-piece.getRow() && col == piece.getColumn()){
+            board.append(SET_BG_COLOR_RED);
+        }
+    }
+
+    public void drawPiece(StringBuilder board, ChessPiece piece){
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            board += SET_TEXT_COLOR_WHITE;
+            board.append(SET_TEXT_COLOR_WHITE);
             switch (piece.getPieceType()) {
-                case KING -> board += BLACK_KING;
-                case QUEEN -> board += BLACK_QUEEN;
-                case BISHOP -> board += BLACK_BISHOP;
-                case KNIGHT -> board += BLACK_KNIGHT;
-                case ROOK -> board += BLACK_ROOK;
-                case PAWN -> board += BLACK_PAWN;
+                case KING -> board.append(BLACK_KING);
+                case QUEEN -> board.append(BLACK_QUEEN);
+                case BISHOP -> board.append(BLACK_BISHOP);
+                case KNIGHT -> board.append(BLACK_KNIGHT);
+                case ROOK -> board.append(BLACK_ROOK);
+                case PAWN -> board.append(BLACK_PAWN);
             }
         } else {
-            board += SET_TEXT_COLOR_BLACK;
+            board.append(SET_TEXT_COLOR_BLACK);
             switch (piece.getPieceType()) {
-                case KING -> board += BLACK_KING;
-                case QUEEN -> board += BLACK_QUEEN;
-                case BISHOP -> board += BLACK_BISHOP;
-                case KNIGHT -> board += BLACK_KNIGHT;
-                case ROOK -> board += BLACK_ROOK;
-                case PAWN -> board += BLACK_PAWN;
+                case KING -> board.append(BLACK_KING);
+                case QUEEN -> board.append(BLACK_QUEEN);
+                case BISHOP -> board.append(BLACK_BISHOP);
+                case KNIGHT -> board.append(BLACK_KNIGHT);
+                case ROOK -> board.append(BLACK_ROOK);
+                case PAWN -> board.append(BLACK_PAWN);
             }
         }
-        return board;
     }
 
-    public String pickBGWhite(String board, int row, int col) {
-        board += SET_TEXT_COLOR_BLACK;
+    public void pickBGWhite(StringBuilder board, int row, int col) {
+        board.append(SET_TEXT_COLOR_BLACK);
         if (row == 0 || row == 9) {
             switch (col) {
-                case 0, 9 -> board += "   ";
-                case 1 -> board += "h ";
-                case 2 -> board += "g" + BETWEEN;
-                case 3 -> board += "f" + BETWEEN;
-                case 4 -> board += "e" + BETWEEN;
-                case 5 -> board += "d" + BETWEEN;
-                case 6 -> board += "c" + BETWEEN;
-                case 7 -> board += "b" + BETWEEN;
-                case 8 -> board += " a" + BETWEEN;
+                case 0, 9 -> board.append("   ");
+                case 1 -> board.append("h ");
+                case 2 -> board.append("g" + BETWEEN);
+                case 3 -> board.append("f" + BETWEEN);
+                case 4 -> board.append("e" + BETWEEN);
+                case 5 -> board.append("d" + BETWEEN);
+                case 6 -> board.append("c" + BETWEEN);
+                case 7 -> board.append("b" + BETWEEN);
+                case 8 -> board.append(" a" + BETWEEN);
             }
         } else {
             switch (row) {
-                case 1 -> board += " 1 ";
-                case 2 -> board += " 2 ";
-                case 3 -> board += " 3 ";
-                case 4 -> board += " 4 ";
-                case 5 -> board += " 5 ";
-                case 6 -> board += " 6 ";
-                case 7 -> board += " 7 ";
-                case 8 -> board += " 8 ";
+                case 1 -> board.append(" 1 ");
+                case 2 -> board.append(" 2 ");
+                case 3 -> board.append(" 3 ");
+                case 4 -> board.append(" 4 ");
+                case 5 -> board.append(" 5 ");
+                case 6 -> board.append(" 6 ");
+                case 7 -> board.append(" 7 ");
+                case 8 -> board.append(" 8 ");
             }
         }
-        return board;
     }
 
-    public String pickBGBlack(String board, int row, int col) {
-        board += SET_TEXT_COLOR_BLACK;
+    public void pickBGBlack(StringBuilder board, int row, int col) {
+        board.append(SET_TEXT_COLOR_BLACK);
         if (row == 0 || row == 9) {
             switch (col) {
-                case 0, 9 -> board += "   ";
-                case 1 -> board += "a ";
-                case 2 -> board += "b" + BETWEEN;
-                case 3 -> board += "c" + BETWEEN;
-                case 4 -> board += "d" + BETWEEN;
-                case 5 -> board += "e" + BETWEEN;
-                case 6 -> board += "f" + BETWEEN;
-                case 7 -> board += "g" + BETWEEN;
-                case 8 -> board += " h" + BETWEEN;
+                case 0, 9 -> board.append("   ");
+                case 1 -> board.append("a ");
+                case 2 -> board.append("b" + BETWEEN);
+                case 3 -> board.append("c" + BETWEEN);
+                case 4 -> board.append("d" + BETWEEN);
+                case 5 -> board.append("e" + BETWEEN);
+                case 6 -> board.append("f" + BETWEEN);
+                case 7 -> board.append("g" + BETWEEN);
+                case 8 -> board.append(" h" + BETWEEN);
             }
         } else {
             switch (row) {
-                case 1 -> board += " 8 ";
-                case 2 -> board += " 7 ";
-                case 3 -> board += " 6 ";
-                case 4 -> board += " 5 ";
-                case 5 -> board += " 4 ";
-                case 6 -> board += " 3 ";
-                case 7 -> board += " 2 ";
-                case 8 -> board += " 1 ";
+                case 1 -> board.append(" 8 ");
+                case 2 -> board.append(" 7 ");
+                case 3 -> board.append(" 6 ");
+                case 4 -> board.append(" 5 ");
+                case 5 -> board.append(" 4 ");
+                case 6 -> board.append(" 3 ");
+                case 7 -> board.append(" 2 ");
+                case 8 -> board.append(" 1 ");
             }
         }
-        return board;
     }
 }
