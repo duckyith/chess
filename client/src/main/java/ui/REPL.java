@@ -99,7 +99,7 @@ public class REPL implements NotificationHandler {
         if (params.length == 3) {promo = params[2];}
         return switch (cmd) {
             case "move" -> inGameClient.move(params[0],params[1],promo);
-            case "resign" -> "not implemented";
+            case "resign" -> inGameClient.resign();
             case "leave" -> inGameClient.leave();
             case "redraw" -> inGameClient.redraw();
             case "highlight" -> "not implemented";

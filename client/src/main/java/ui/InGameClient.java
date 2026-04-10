@@ -57,6 +57,11 @@ public class InGameClient {
         return new DrawBoard(gameData.game()).drawWhite();
     }
 
+    public String resign() throws ResponseException {
+        webSocketFacade.resign(authToken,gameID);
+        return "you resigned the game";
+    }
+
     public String move(String startPos, String endPos, String promo) throws ResponseException {
         String startLetter = startPos.substring(0,1);
         String startNumber = startPos.substring(1,2);

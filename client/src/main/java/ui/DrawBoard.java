@@ -92,14 +92,14 @@ public class DrawBoard {
         if (row == 0 || row == 9) {
             switch (col) {
                 case 0, 9 -> board += "   ";
-                case 1 -> board += "a ";
-                case 2 -> board += "b" + BETWEEN;
-                case 3 -> board += "c" + BETWEEN;
-                case 4 -> board += "d" + BETWEEN;
-                case 5 -> board += "e" + BETWEEN;
-                case 6 -> board += "f" + BETWEEN;
-                case 7 -> board += "g" + BETWEEN;
-                case 8 -> board += " h" + BETWEEN;
+                case 1 -> board += "h ";
+                case 2 -> board += "g" + BETWEEN;
+                case 3 -> board += "f" + BETWEEN;
+                case 4 -> board += "e" + BETWEEN;
+                case 5 -> board += "d" + BETWEEN;
+                case 6 -> board += "c" + BETWEEN;
+                case 7 -> board += "b" + BETWEEN;
+                case 8 -> board += " a" + BETWEEN;
             }
         } else {
             switch (row) {
@@ -121,14 +121,14 @@ public class DrawBoard {
         if (row == 0 || row == 9) {
             switch (col) {
                 case 0, 9 -> board += "   ";
-                case 1 -> board += "h ";
-                case 2 -> board += "g" + BETWEEN;
-                case 3 -> board += "f" + BETWEEN;
-                case 4 -> board += "e" + BETWEEN;
-                case 5 -> board += "d" + BETWEEN;
-                case 6 -> board += "c" + BETWEEN;
-                case 7 -> board += "b" + BETWEEN;
-                case 8 -> board += " a" + BETWEEN;
+                case 1 -> board += "a ";
+                case 2 -> board += "b" + BETWEEN;
+                case 3 -> board += "c" + BETWEEN;
+                case 4 -> board += "d" + BETWEEN;
+                case 5 -> board += "e" + BETWEEN;
+                case 6 -> board += "f" + BETWEEN;
+                case 7 -> board += "g" + BETWEEN;
+                case 8 -> board += " h" + BETWEEN;
             }
         } else {
             switch (row) {
